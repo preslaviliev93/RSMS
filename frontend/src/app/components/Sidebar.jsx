@@ -1,7 +1,7 @@
 "use client";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { Home, Server, Router, User, FileText, Map, Menu, CircleUserRound, SunMoon, UserPen } from "lucide-react";
+import { Home, Server, Router, User, FileText, Map, Menu, CircleUserRound, SunMoon, UserPen, ChartArea } from "lucide-react";
 import CustomIconLink from "./CustomIconLink";
 import SidebarSectionTitle from "./SidebarSectionTitle";
 import ThemeToggleButton from "./ThemeToggleButton";
@@ -33,6 +33,7 @@ export default function Sidebar() {
       
       <SidebarSectionTitle>Clients</SidebarSectionTitle>
       <CustomIconLink href="/" icon={<CircleUserRound />} text="Clients" />
+      <CustomIconLink href="/" icon={<ChartArea />} text="Client Statistics" />
 
       <SidebarSectionTitle>Network</SidebarSectionTitle>
       <CustomIconLink href="/" icon={<Router />} text="Routers" />
