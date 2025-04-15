@@ -3,7 +3,7 @@ import "./globals.css";
 import Sidebar from "./components/Sidebar";
 import TopNav from "./components/TopNav";
 import { ThemeProvider } from "./components/ThemeProvider";
-
+import { UserProvider } from "./context/UserContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,6 +24,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
+        <UserProvider>
         <ThemeProvider>
           <div className="flex h-screen bg-white dark:bg-[#0a0a0a] text-black dark:text-gray-200">
             <Sidebar />
@@ -35,6 +36,7 @@ export default function RootLayout({ children }) {
             </div>
           </div>
         </ThemeProvider>
+        </UserProvider>
       </body>
     </html>
   );

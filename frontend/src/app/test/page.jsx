@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 export default function TestPage() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     setMounted(true);
@@ -27,6 +28,7 @@ export default function TestPage() {
       >
         Toggle Theme (Current: {theme})
       </button>
+      <p className="mt-4">API URL: {API_URL || 'no api url'}</p>
     </div>
   );
 }

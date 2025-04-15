@@ -12,3 +12,5 @@ channels
 ------------------------ FRONTEND ------------------------
 next-themes
 lucide-react
+jwt-decode
+dotenv
