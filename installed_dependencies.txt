@@ -4,3 +4,11 @@ djangorestframework
 django-cors-headers
 djangorestframework-simplejwt
 channels
+
+
+
+
+
+------------------------ FRONTEND ------------------------
+next-themes
+lucide-react
