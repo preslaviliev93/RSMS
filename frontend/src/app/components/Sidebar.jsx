@@ -16,6 +16,8 @@ export default function Sidebar() {
   const router = useRouter();
   const { user, loadingUser, checking } = useAuthGuardForUI();
   const { logout } = useUser();
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -35,37 +37,69 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="h-full bg-white dark:bg-[#121212] text-gray-800 dark:text-gray-200 shadow-lg p-4 w-16 md:w-20 lg:w-64 xl:w-72 transition-all duration-300">
+    <aside className={`
+      flex flex-col
+      bg-[#121212] text-gray-200
+      shadow-lg p-4 transition-all duration-300
+      ${collapsed ? 'w-16' : 'w-64 md:w-72 lg:w-80 xl:w-[22rem]'}
+    `}>
+    
+    
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-4"
+      >
+        {collapsed ? (
+          <span className="flex items-center justify-center w-6 h-6">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </span>
+        ) : (
+          <span className="flex items-center justify-center w-6 h-6">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </span>
+        )}
+      </button>
+
       <div className="flex w-full gap-4 items-center mb-8">
         <Image src="/logo1.png" alt="Logo" width={40} height={40} className="" />
-        <h2 className="font-bold text-lg hidden lg:block lg:text-xl xl:text-2xl text-gray-800 dark:text-gray-200">RSMS</h2>
+        {!collapsed && <h2 className="font-bold text-lg hidden lg:block lg:text-xl xl:text-2xl text-gray-800 dark:text-gray-200">RSMS</h2>}
+        
       </div>
 
-      <CustomIconLink href="/" icon={<Home />} text="Home" />
-      {user && <CustomIconLink href="/" icon={<UserPen />} text="My Profile" />}
-      {!user && <CustomIconLink href="/login" icon={<KeyRound />} text="Login" />}
+      <CustomIconLink href="/" icon={<Home />}  text="Home"  collapsed={collapsed} />
+      {user && <CustomIconLink href="/" icon={<UserPen />} text="My Profile" collapsed={collapsed} />}
+      {!user && <CustomIconLink href="/login" icon={<KeyRound />} text="Login" collapsed={collapsed} />}
 
       {user && (
         <>
-          <SidebarSectionTitle>Clients</SidebarSectionTitle>
-          <CustomIconLink href="/" icon={<CircleUserRound />} text="Clients" />
-          <CustomIconLink href="/" icon={<ChartArea />} text="Client Statistics" />
+          {!collapsed && <SidebarSectionTitle>Clients</SidebarSectionTitle>}
+          <CustomIconLink href="/" icon={<CircleUserRound />} text="Clients" collapsed={collapsed} />
+          <CustomIconLink href="/" icon={<ChartArea />} text="Client Statistics" collapsed={collapsed} />
 
-          <SidebarSectionTitle>Network</SidebarSectionTitle>
-          <CustomIconLink href="/" icon={<Router />} text="Routers" />
-          <CustomIconLink href="/servers" icon={<Server />} text="Servers" />
-          <CustomIconLink href="/" icon={<FileText />} text="Logs" />
+          {!collapsed && <SidebarSectionTitle>Network</SidebarSectionTitle>}
+          <CustomIconLink href="/" icon={<Router />} text="Routers" collapsed={collapsed} />
+          <CustomIconLink href="/servers" icon={<Server />} text="Servers" collapsed={collapsed} />
+          <CustomIconLink href="/" icon={<FileText />} text="Logs" collapsed={collapsed} />
 
           <button
             onClick={handleLogout}
             className="my-2 flex items-center md:justify-start justify-center gap-4 px-2 py-2 text-sm text-[#121212] dark:text-gray-200 hover:bg-[#2c2c2c] transition-colors duration-200 rounded w-full"
           >
             <span className="flex items-center justify-center w-6 h-6"><LogOut /></span>
-            <span className="hidden lg:inline">Logout</span>
+            {!collapsed && <span className="hidden lg:inline">Logout</span>}
           </button>
+
         </>
       )}
-      <ThemeToggleButton />
+      <ThemeToggleButton collapsed={collapsed}/>
     </aside>
   );
 }
+
+
+
+// FIX LABELS AND LOGO AND TITLE

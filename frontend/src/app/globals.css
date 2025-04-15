@@ -2,7 +2,11 @@
 @import "tailwindcss/utilities";
 @custom-variant dark (&:where(.dark, .dark *));
 
-
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
 
 /* LIGHT THEME COLORS */
 :root {
