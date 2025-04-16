@@ -17,6 +17,8 @@ export default function Page() {
     <div className="space-y-6 text-gray-800 dark:text-gray-100">
       <h1 className="text-2xl font-bold">Servers</h1>
       <ServersTable />
+      <ServersTable />
+      <ServersTable />
     </div>
   );
 }

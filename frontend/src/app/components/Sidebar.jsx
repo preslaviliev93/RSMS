@@ -1,14 +1,21 @@
-'use client';
+'use client'
+import React from 'react'
+import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
-import { Home, Server, Router, FileText, CircleUserRound, UserPen, ChartArea, KeyRound, LogOut } from 'lucide-react';
-import CustomIconLink from './CustomIconLink';
-import SidebarSectionTitle from './SidebarSectionTitle';
-import ThemeToggleButton from './ThemeToggleButton';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import {useRouter} from 'next/navigation';
 import { useAuthGuardForUI } from '../hooks/useAuthGuardForUI';
 import { useUser } from '../context/UserContext';
+import CustomIconLink from './CustomIconLink';
+import SidebarSectionTitle from '../components/SidebarSectionTitle';
+import ThemeToggleButton from '../components/ThemeToggleButton';
+import Image from 'next/image';
+import CollapseToggleButton from '../components/CollapseToggleButton';
+
+import {
+  Home, Server, Router, FileText,
+  CircleUserRound, UserPen, ChartArea,
+  KeyRound, LogOut
+} from 'lucide-react'
 
 export default function Sidebar() {
   const [mounted, setMounted] = useState(false); 
@@ -36,40 +43,38 @@ export default function Sidebar() {
     );
   }
 
+
   return (
     <aside className={`
-      flex flex-col
-      bg-[#121212] text-gray-200
-      shadow-lg p-4 transition-all duration-300
-      ${collapsed ? 'w-16' : 'w-64 md:w-72 lg:w-80 xl:w-[22rem]'}
+      flex flex-col h-screen flex-shrink-0
+      bg-[#f8f8f8] dark:bg-[#121212]
+      border-r border-[var(--border-color)]/20 shadow-sm
+      transition-all duration-300 ease-in-out
+      items-center sm:items-start
+      px-2 py-4
+      
     `}>
     
     
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-4"
-      >
-        {collapsed ? (
-          <span className="flex items-center justify-center w-6 h-6">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </span>
-        ) : (
-          <span className="flex items-center justify-center w-6 h-6">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-            </svg>
-          </span>
-        )}
-      </button>
+    
+    
+  {/* Sidebar content */}
 
-      <div className="flex w-full gap-4 items-center mb-8">
-        <Image src="/logo1.png" alt="Logo" width={40} height={40} className="" />
-        {!collapsed && <h2 className="font-bold text-lg hidden lg:block lg:text-xl xl:text-2xl text-gray-800 dark:text-gray-200">RSMS</h2>}
-        
+ 
+
+     
+         <div className="flex items-center gap-2">
+         <Image src="/logo1.png" alt="Logo" width={40} height={40} className="" />
+         {!collapsed && <h2 className="font-bold text-lg hidden md:block lg:text-xl xl:text-2xl text-gray-800 dark:text-gray-200">RSMS</h2>}  
+         </div>
+         
+   
+      {!collapsed && <SidebarSectionTitle>Dashboard</SidebarSectionTitle>}
+      <div className="hidden md:flex items-center">
+        <CollapseToggleButton collapsed={collapsed} setCollapsed={setCollapsed} />
       </div>
-
+     
+      {!collapsed && <SidebarSectionTitle>Navigation</SidebarSectionTitle>}
       <CustomIconLink href="/" icon={<Home />}  text="Home"  collapsed={collapsed} />
       {user && <CustomIconLink href="/" icon={<UserPen />} text="My Profile" collapsed={collapsed} />}
       {!user && <CustomIconLink href="/login" icon={<KeyRound />} text="Login" collapsed={collapsed} />}
@@ -90,16 +95,14 @@ export default function Sidebar() {
             className="my-2 flex items-center md:justify-start justify-center gap-4 px-2 py-2 text-sm text-[#121212] dark:text-gray-200 hover:bg-[#2c2c2c] transition-colors duration-200 rounded w-full"
           >
             <span className="flex items-center justify-center w-6 h-6"><LogOut /></span>
-            {!collapsed && <span className="hidden lg:inline">Logout</span>}
+            {!collapsed && <span className="hidden md:inline">Logout</span>}
           </button>
 
         </>
       )}
       <ThemeToggleButton collapsed={collapsed}/>
-    </aside>
-  );
+</aside>
+
+
+  )
 }
-
-
-
-// FIX LABELS AND LOGO AND TITLE

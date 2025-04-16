@@ -19,7 +19,7 @@ export default function ThemeToggleButton({ collapsed }) {
         <SunMoon className="w-5 h-5" />
       </span>
       {!collapsed && (
-        <span className="hidden lg:inline">
+        <span className="hidden md:inline">
           {resolvedTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
         </span>
       )}

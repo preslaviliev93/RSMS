@@ -23,22 +23,29 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
+      <body className={`bg-[var(--background)] text-[var(--font-color)] min-h-screen ${geistSans.variable} ${geistMono.variable}`}>
         <UserProvider>
-        <ThemeProvider>
-          <div className="flex h-screen bg-white dark:bg-[#0a0a0a] text-black dark:text-gray-200">
-            <Sidebar />
-            <div className="flex flex-col flex-1">
-              <TopNav />
-              <main className="p-6 overflow-y-auto">
-                {children}
-              </main>
-            </div>
-          </div>
-        </ThemeProvider>
+          <ThemeProvider>
+          <div className="flex h-screen overflow-hidden">
+  {/* Fixed Sidebar */}
+  <Sidebar />
+
+  {/* Right section: scrollable content */}
+  <div className="flex flex-col flex-1 overflow-hidden">
+    <header className="h-16 border-b border-[var(--border-color)]/20 shadow-sm">
+      <TopNav />
+    </header>
+
+    {/* This part is scrollable */}
+    <main className="flex-1 overflow-y-auto p-6">
+      {children}
+    </main>
+  </div>
+</div>
+
+          </ThemeProvider>
         </UserProvider>
       </body>
     </html>
   );
 }
-
