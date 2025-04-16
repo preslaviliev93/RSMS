@@ -48,6 +48,7 @@ export default function Sidebar() {
     <aside className={`
       flex flex-col h-screen flex-shrink-0
       bg-[#f8f8f8] dark:bg-[#121212]
+
       border-r border-[var(--border-color)]/20 shadow-sm
       transition-all duration-300 ease-in-out
       items-center sm:items-start
@@ -82,11 +83,11 @@ export default function Sidebar() {
       {user && (
         <>
           {!collapsed && <SidebarSectionTitle>Clients</SidebarSectionTitle>}
-          <CustomIconLink href="/" icon={<CircleUserRound />} text="Clients" collapsed={collapsed} />
+          <CustomIconLink href="/clients" icon={<CircleUserRound />} text="Clients" collapsed={collapsed} />
           <CustomIconLink href="/" icon={<ChartArea />} text="Client Statistics" collapsed={collapsed} />
 
           {!collapsed && <SidebarSectionTitle>Network</SidebarSectionTitle>}
-          <CustomIconLink href="/" icon={<Router />} text="Routers" collapsed={collapsed} />
+          <CustomIconLink href="/routers" icon={<Router />} text="Routers" collapsed={collapsed} />
           <CustomIconLink href="/servers" icon={<Server />} text="Servers" collapsed={collapsed} />
           <CustomIconLink href="/" icon={<FileText />} text="Logs" collapsed={collapsed} />
 
