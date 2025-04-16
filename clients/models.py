@@ -1,9 +1,14 @@
 from django.db import models
 
 class Client(models.Model):
-    client_name = models.CharField(max_length=100)
+    client_name = models.CharField(max_length=100, unique=True)
+    client_description = models.TextField()
     client_country = models.CharField(max_length=100)
     client_city = models.CharField(max_length=100)
+    client_hostname= models.CharField(max_length=100)
+    client_router_prefix = models.CharField(max_length=100)
     client_address = models.CharField(max_length=100)
     client_data_center = models.CharField(max_length=100)
-    client_routers = models.IntegerField() #this fill be foreign key from the routers table
+
+    def __str__(self):
+        return self.client_name

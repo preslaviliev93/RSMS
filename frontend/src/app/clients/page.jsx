@@ -1,131 +1,99 @@
 'use client'
-import { useState } from 'react'
-import ClientCard from '../components/ClientCard'
 
-const mockClients = [
-  {
-    id: 1,
-    client_name: "ACME Corp",
-    client_country: "Germany",
-    client_city: "Berlin",
-    client_address: "Alexanderplatz 1",
-    client_data_center: "DC-Frankfurt",
-    client_routers: 4,
-  },
-  {
-    id: 2,
-    client_name: "Globex",
-    client_country: "USA",
-    client_city: "New York",
-    client_address: "5th Ave 123",
-    client_data_center: "DC-NYC",
-    client_routers: 7,
-  },
-  {
-    id: 3,
-    client_name: "Soylent",
-    client_country: "UK",
-    client_city: "London",
-    client_address: "Green Street",
-    client_data_center: "DC-London",
-    client_routers: 2,
-  },
-  {
-    id: 4,
-    client_name: "Soylent",
-    client_country: "UK",
-    client_city: "London",
-    client_address: "Green Street",
-    client_data_center: "DC-London",
-    client_routers: 2,
-  },
-  {
-    id: 5,
-    client_name: "Soylent",
-    client_country: "UK",
-    client_city: "London",
-    client_address: "Green Street",
-    client_data_center: "DC-London",
-    client_routers: 2,
-  },
-  {
-    id: 6,
-    client_name: "Soylent",
-    client_country: "UK",
-    client_city: "London",
-    client_address: "Green Street",
-    client_data_center: "DC-London",
-    client_routers: 2,
-  },
-  {
-    id: 7,
-    client_name: "Soylent",
-    client_country: "UK",
-    client_city: "London",
-    client_address: "Green Street",
-    client_data_center: "DC-London",
-    client_routers: 2,
-  },
-  {
-    id: 8,
-    client_name: "Soylent",
-    client_country: "UK",
-    client_city: "London",
-    client_address: "Green Street",
-    client_data_center: "DC-London",
-    client_routers: 2,
-  },
-  {
-    id: 9,
-    client_name: "Soylent",
-    client_country: "UK",
-    client_city: "London",
-    client_address: "Green Street",
-    client_data_center: "DC-London",
-    client_routers: 2,
-  },
-  {
-    id: 10,
-    client_name: "Soylent",
-    client_country: "UK",
-    client_city: "London",
-    client_address: "Green Street",
-    client_data_center: "DC-London",
-    client_routers: 2,
+import { useEffect, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { useAuthGuard } from '../hooks/useAuthGuard'
+import axios from 'axios'
+import {
+  MapPin,
+  Building2,
+  Server,
+  Info,
+  Globe,
+  ShieldCheck
+} from 'lucide-react'
+
+export default function ClientDetailsPage() {
+  const { id } = useParams()
+  const router = useRouter()
+  const { user, loadingUser } = useAuthGuard()
+
+  const [client, setClient] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const API_URL = process.env.NEXT_PUBLIC_API_URL
+
+  useEffect(() => {
+    if (!user) return
+
+    const fetchClient = async () => {
+      try {
+        const token = localStorage.getItem('accessToken')
+        const response = await axios.get(`${API_URL}/clients/all-clients/${id}/`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+        setClient(response.data)
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to fetch client.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchClient()
+  }, [id, user, API_URL])
+
+  if (loadingUser || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <img src="/loading.svg" className="w-16 h-16 animate-spin" alt="Loading..." />
+      </div>
+    )
   }
-]
 
-export default function ClientsPage() {
-  const [search, setSearch] = useState('')
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-red-500">{error}</p>
+      </div>
+    )
+  }
 
-  const filteredClients = mockClients.filter(client =>
-    client.client_name.toLowerCase().includes(search.trim().toLowerCase())
-  )
-  
+  if (!client) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-500">Client not found.</p>
+      </div>
+    )
+  }
 
   return (
-    <div className="space-y-6">
-      {/* 🔍 Search Input */}
-      <div className="flex justify-between items-center">
-        <input
-          type="text"
-          placeholder="Search by client name..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full md:w-1/3 px-4 py-2 border rounded-lg shadow-sm bg-white dark:bg-[#121212] text-gray-800 dark:text-gray-100 border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+    <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-[#1c1c1c] rounded-xl shadow-md space-y-6 border border-gray-300 dark:border-gray-700">
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{client.client_name}</h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-300">
+        <p className="flex items-center gap-2"><MapPin className="w-4 h-4" /> {client.client_city}, {client.client_country}</p>
+        <p className="flex items-center gap-2"><Building2 className="w-4 h-4" /> {client.client_data_center}</p>
+        <p className="flex items-center gap-2"><Globe className="w-4 h-4" /> Hostname: {client.client_hostname}</p>
+        <p className="flex items-center gap-2"><Server className="w-4 h-4" /> Router Prefix: {client.client_router_prefix}</p>
+        <p className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> ID: {client.id}</p>
       </div>
 
-      {/* 🧩 Client Cards */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredClients.length > 0 ? (
-          filteredClients.map(client => (
-            <ClientCard key={client.id} client={client} />
-          ))
-        ) : (
-          <p className="text-gray-500 dark:text-gray-400 col-span-full">No clients found.</p>
-        )}
-      </div>
+      {client.client_description && (
+        <div className="pt-4 text-gray-800 dark:text-gray-200">
+          <h2 className="font-semibold flex items-center gap-2 text-lg">
+            <Info className="w-5 h-5" /> Description
+          </h2>
+          <p className="mt-2 text-sm">{client.client_description}</p>
+        </div>
+      )}
     </div>
   )
 }
+
+
+
+
+// FIX ID DETAILS NOT WORKING WITH USEPARAMS
