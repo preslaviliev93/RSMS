@@ -6,11 +6,13 @@ const UserContext = createContext();
 
 export function UserProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loadingUser, setLoadingUser] = useState(true);  // <-- add loadingUser
+  const [loadingUser, setLoadingUser] = useState(true); 
+  const [role, setRole] = useState(null);
 
   useEffect(() => {
     if (isLoggedIn()) {
       setUser(getUserData());
+      setRole(getUserData.role)
     }
     setLoadingUser(false);  // <-- done checking
   }, []);

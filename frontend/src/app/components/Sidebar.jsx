@@ -2,7 +2,7 @@
 import React from 'react'
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
-import {useRouter} from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useAuthGuardForUI } from '../hooks/useAuthGuardForUI';
 import { useUser } from '../context/UserContext';
 import CustomIconLink from './CustomIconLink';
@@ -19,12 +19,11 @@ import {
 
 export default function Sidebar() {
   const [mounted, setMounted] = useState(false); 
-  const { resolvedTheme } = useTheme();
   const router = useRouter();
   const { user, loadingUser, checking } = useAuthGuardForUI();
   const { logout } = useUser();
   const [collapsed, setCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [role, setRole] = useState("");
 
   const handleLogout = async () => {
     await logout();
@@ -34,6 +33,13 @@ export default function Sidebar() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      const userRole = localStorage.getItem('userData.role')
+      console.log(`User role: ${userRole}`);
+    }
+  }, [user, loadingUser, checking]);
 
   if (!mounted || checking || loadingUser) {
     return (
