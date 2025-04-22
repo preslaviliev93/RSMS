@@ -36,7 +36,8 @@ export default function Sidebar() {
 
   useEffect(() => {
     if (user) {
-      const userRole = localStorage.getItem('userData.role')
+      const userRole = JSON.parse(localStorage.getItem("userData") || "{}").role || "";
+
       console.log(`User role: ${userRole}`);
     }
   }, [user, loadingUser, checking]);

@@ -5,6 +5,7 @@ import { useAuthGuard } from '../hooks/useAuthGuard'
 import axios from 'axios'
 import ClientCard from '../components/ClientCard'
 import PaginationControls from '../components/PaginationControls'
+import FilterResultsSeaching from '../components/FilterResultsSeaching'
 
 export default function ClientsPage() {
   const { user, loadingUser } = useAuthGuard()
@@ -14,6 +15,11 @@ export default function ClientsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState('')
+
+  const filteredClients = clients.filter((client) =>
+    JSON.stringify(client).toLowerCase().includes(search.toLowerCase())
+  );
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -55,11 +61,20 @@ export default function ClientsPage() {
 
   return (
     <div className="flex flex-col min-h-full gap-4">
+      <FilterResultsSeaching
+        type="text"
+        placeholder="Search clients..."
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+      />
   {/* Scrollable content area */}
   <div className="flex-grow">
     <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-      {clients.map((client) => (
-        <ClientCard key={client.id} client={client} />
+      {filteredClients.map((client) =>(
+        <ClientCard
+          key={client.id}
+          client={client}
+          />
       ))}
     </div>
   </div>

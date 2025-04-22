@@ -15,7 +15,22 @@ export function getRefreshToken() {
     return localStorage.getItem("refreshToken");
 }
 
+export function clearAuthData() {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userData");
+}
 
+export function tokenExpired(token) {
+    try {
+        const {exp} = jwtDecode(token);
+        return exp * 1000 < Date.now(); // True = token is expired
+
+    } catch (error) {
+        console.warn(`Something went wrong while checking if token is expired: ${error}`);
+        return true;
+    }
+}
 
 
 export function getUserData() {
@@ -58,20 +73,43 @@ export async function logout(){
     }catch(err){
         console.warn(`Something went wrong while logging out: ${err}`);
     }finally{
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("userData");
+       clearAuthData(); // Clear auth data after logout 
     } 
 }
 
 
+// export function isLoggedIn(){
+//     try{
+//         const token = getAccessToken();
+//         if(!token) return false;
+//         return !!token;
+//     }catch(error){
+//         console.warn(`Something went wrong while checking if user is logged in: ${error}`);
+//         return false;
+//     }
+// }
+
 export function isLoggedIn(){
+    const token = getAccessToken();
+    return token && !tokenExpired(token);
+}
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL
+
+export async function tryRefresh() {
+    const refresh = getRefreshToken();
+    if(!refresh) return false;
     try{
-        const token = getAccessToken();
-        if(!token) return false;
-        return !!token;
-    }catch(error){
-        console.warn(`Something went wrong while checking if user is logged in: ${error}`);
+        const {data} = await axios.post(`${API_URL}/users/token/refresh/`,{
+            refresh,
+        });
+        saveTokens({
+            accessToken: data.access,
+            refreshToken: data.refresh ||refresh,
+        });
+        return true;
+    } catch (error){
+        clearAuthData();
         return false;
     }
 }
