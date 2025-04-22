@@ -52,16 +52,18 @@ export default function PaginationControls({
           className="w-16 px-2 py-1 rounded-md border dark:bg-gray-800 dark:border-gray-600 dark:text-white"
         />
 
-        <select
+      <select
           value={pageSize}
-          onChange={(e) => setPageSize(e.target.value)}
+          onChange={(e) => {
+            setPageSize(parseInt(e.target.value, 10)); // ✅ convert to number
+            onPageChange(1); // ✅ reset page when page size changes
+          }}
           className="px-2 py-1 rounded-md border dark:bg-gray-800 dark:border-gray-600 dark:text-white cursor-pointer"
         >
           <option value="10">10</option>
           <option value="50">50</option>
           <option value="100">100</option>
-          <option value="-1">All</option>
-        </select>
+      </select>
       </div>
     </div>
   )

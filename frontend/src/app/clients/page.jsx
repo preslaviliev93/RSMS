@@ -12,40 +12,48 @@ export default function ClientsPage() {
   const [clients, setClients] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(12)
   const [search, setSearch] = useState('')
-
-  const filteredClients = clients.filter((client) =>
-    JSON.stringify(client).toLowerCase().includes(search.toLowerCase())
-  );
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL
 
   useEffect(() => {
     if (!user) return;
-  
+
     const fetchClients = async () => {
+      setLoading(true)
       try {
-        const token = localStorage.getItem('accessToken');
+        const token = localStorage.getItem('accessToken')
         const response = await axios.get(`${API_URL}/clients/all-clients/`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        });
-  
-        setClients(response.data.results);
+          params: {
+            page_size: 9999, // Get all clients once
+          },
+        })
+
+        setClients(response.data.results)
       } catch (err) {
-        setError(err.response?.data?.message || 'Failed to fetch clients.');
+        setError(err.response?.data?.message || 'Failed to fetch clients.')
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
+
+    fetchClients()
+  }, [user, API_URL])
+
+ 
+  const filteredClients = clients.filter(client =>
+    client.client_name.toLowerCase().includes(search.toLowerCase())
+  )
   
-    fetchClients();
-  }, [user, API_URL]); // <-- make sure this line is correct
-  
+
+  const totalPages = Math.max(1, Math.ceil(filteredClients.length / pageSize))
+  const startIndex = (currentPage - 1) * pageSize
+  const paginatedClients = filteredClients.slice(startIndex, startIndex + pageSize)
 
   if (loadingUser || loading) {
     return (
@@ -65,29 +73,36 @@ export default function ClientsPage() {
         type="text"
         placeholder="Search clients..."
         value={search}
-        onChange={e => setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value)
+          setCurrentPage(1)
+        }}
       />
-  {/* Scrollable content area */}
-  <div className="flex-grow">
-    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-      {filteredClients.map((client) =>(
-        <ClientCard
-          key={client.id}
-          client={client}
-          />
-      ))}
+
+      <div className="flex-grow">
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {paginatedClients.length > 0 ? (
+            paginatedClients.map((client) => (
+              <ClientCard key={client.id} client={client} />
+            ))
+          ) : (
+            <p className="text-gray-500 dark:text-gray-400 col-span-full">
+              No clients match your search.
+            </p>
+          )}
+        </div>
+      </div>
+
+      <PaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        pageSize={pageSize}
+        setPageSize={(value) => {
+          setPageSize(parseInt(value))
+          setCurrentPage(1)
+        }}
+      />
     </div>
-  </div>
-
-  {/* Pagination at the bottom */}
-  <PaginationControls
-    currentPage={currentPage}
-    totalPages={totalPages}
-    onPageChange={setCurrentPage}
-    pageSize={pageSize}
-    setPageSize={setPageSize}
-  />
-</div>
-
   )
 }

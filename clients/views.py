@@ -14,6 +14,9 @@ class ClientCreateAPIView(APIView):
 
     def get(self, request):
         clients = Client.objects.all().order_by('-id')
+        search = request.query_params.get('search')
+        if search:
+            clients = clients.filter(client_name__icontains=search)
         paginator = ClientPagination()
         result_page = paginator.paginate_queryset(clients, request)
         serializer = ClientSerializer(result_page, many=True)
