@@ -8,10 +8,11 @@ class Client(models.Model):
     client_description = models.TextField()
     client_country = models.CharField(max_length=100)
     client_city = models.CharField(max_length=100)
-    client_hostname= models.CharField(max_length=100)
+    client_hostname=models.CharField(max_length=100)
     client_router_prefix = models.CharField(max_length=100)
     client_address = models.CharField(max_length=100, null=True, blank=True)
     client_data_center = models.CharField(max_length=100)
+    client_added = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.client_name

@@ -105,7 +105,7 @@ export default function Logs() {
               <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Type</th>
               <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Client</th>
               <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">User</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Action</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Message</th>
               <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Date</th>
             </tr>
           </thead>

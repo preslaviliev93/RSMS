@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
     'channels',
+    'stats',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
