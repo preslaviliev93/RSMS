@@ -37,6 +37,8 @@ export default function Sidebar() {
   useEffect(() => {
     if (user) {
       const userRole = JSON.parse(localStorage.getItem("userData") || "{}").role || "";
+      setRole(userRole);
+
 
     }
   }, [user, loadingUser, checking]);
@@ -95,7 +97,7 @@ export default function Sidebar() {
           {!collapsed && <SidebarSectionTitle>Network</SidebarSectionTitle>}
           <CustomIconLink href="/routers" icon={<Router />} text="Routers" collapsed={collapsed} />
           <CustomIconLink href="/servers" icon={<Server />} text="Servers" collapsed={collapsed} />
-          <CustomIconLink href="/" icon={<FileText />} text="Logs" collapsed={collapsed} />
+          {role === "admin" && <CustomIconLink href="/logs" icon={<FileText />} text="Logs" collapsed={collapsed} />}
 
           <button
             onClick={handleLogout}

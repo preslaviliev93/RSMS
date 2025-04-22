@@ -5,8 +5,9 @@ from rest_framework.permissions import IsAuthenticated
 from clients.models import Client, ClientsLogs
 from clients.serializers import ClientSerializer, ClientsLogsSerializer
 from .permissions import IsAdminOrReadOnly
-from .paginations import ClientPagination
+from .paginations import ClientPagination, ClientsLogsPagination
 from django.db.models import Q
+
 
 class ClientCreateAPIView(APIView):
     permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
@@ -98,4 +99,28 @@ class ClientDetailAPIView(APIView):
         client.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+class ClientLogView(APIView):
+    permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
+    def get_object(self):
+        try:
+            return ClientsLogs.objects.all()
+        except ClientsLogs.DoesNotExist:
+            return None
+
+    def get(self, request):
+        logs = ClientsLogs.objects.all().order_by('-timestamp')
+        search = request.query_params.get('search')
+        if search:
+            clients = logs.filter(
+                Q(log_type__icontains=search) |
+                Q(client_name__icontains=search) |
+                Q(user__icontains=search) |
+                Q(action__icontains=search) |
+                Q(timestamp__icontains=search)
+            )
+        paginator = ClientsLogsPagination()
+        result_page = paginator.paginate_queryset(logs, request)
+        serializer = ClientsLogsSerializer(result_page, many=True)
+        return Response(serializer.data)
 
