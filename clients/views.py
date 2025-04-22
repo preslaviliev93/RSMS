@@ -6,6 +6,7 @@ from clients.models import Client
 from clients.serializers import ClientSerializer
 from .permissions import IsAdminOrReadOnly
 from .paginations import ClientPagination
+from django.db.models import Q
 
 class ClientCreateAPIView(APIView):
     permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
@@ -16,7 +17,15 @@ class ClientCreateAPIView(APIView):
         clients = Client.objects.all().order_by('-id')
         search = request.query_params.get('search')
         if search:
-            clients = clients.filter(client_name__icontains=search)
+            clients = clients.filter(
+                Q(client_name__icontains=search) |
+                Q(client_city__icontains=search) |
+                Q(client_country__icontains=search) |
+                Q(client_data_center__icontains=search) |
+                Q(client_hostname__icontains=search) |
+                Q(client_router_prefix__icontains=search) |
+                Q(client_address__icontains=search)
+            )
         paginator = ClientPagination()
         result_page = paginator.paginate_queryset(clients, request)
         serializer = ClientSerializer(result_page, many=True)

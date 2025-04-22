@@ -46,9 +46,17 @@ export default function ClientsPage() {
   }, [user, API_URL])
 
  
+  // const filteredClients = clients.filter(client =>
+  //   Object.values(client)
+  //     .filter(value => typeof value === 'string') // only search string fields
+  //     .some(value => value.toLowerCase().includes(search.toLowerCase()))
+  // )
   const filteredClients = clients.filter(client =>
-    client.client_name.toLowerCase().includes(search.toLowerCase())
+    Object.values(client)
+      .filter(value => typeof value === 'string')
+      .some(value => value.toLowerCase().includes(search.toLowerCase()))
   )
+  
   
 
   const totalPages = Math.max(1, Math.ceil(filteredClients.length / pageSize))
@@ -78,6 +86,10 @@ export default function ClientsPage() {
           setCurrentPage(1)
         }}
       />
+      <p className="text-sm text-gray-600 dark:text-gray-300">
+        Showing {paginatedClients.length} / {clients.length} 
+      </p>
+
 
       <div className="flex-grow">
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
