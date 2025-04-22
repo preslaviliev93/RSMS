@@ -1,3 +1,5 @@
+from django.db.models import Count
+from django.db.models.functions import TruncDate
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -18,15 +20,28 @@ class ClientsByDateView(APIView):
             start_date = datetime.strptime(start, '%Y-%m-%d').date()
             end_date = datetime.strptime(end, '%Y-%m-%d').date()
 
-            clients = Client.objects.filter(client_added__date__range=[start_date, end_date])
-            logs = ClientsLogs.objects.filter(timestamp__date__range=[start_date, end_date])
+            clients = (
+                Client.objects
+                .filter(client_added__date__range=[start_date, end_date])
+                .annotate(date=TruncDate('client_added'))
+                .values('date')
+                .annotate(count=Count('id'))
+                .order_by('date')
+            )
 
+            logs = (
+                ClientsLogs.objects
+                .filter(timestamp__date__range=[start_date, end_date])
+                .annotate(date=TruncDate('timestamp'))
+                .values('date')
+                .annotate(count=Count('id'))
+                .order_by('date')
+            )
 
             data = {
-                'clients': [{'label': 'Clients', 'value': clients.count()}],
-                'logs': [{'label': 'Logs', 'value': logs.count()}]
+                'clients': [{'date': c['date'], 'count': c['count']} for c in clients],
+                'logs': [{'date': l['date'], 'count': l['count']} for l in logs]
             }
-
             return Response(data)
 
         except Exception as e:
