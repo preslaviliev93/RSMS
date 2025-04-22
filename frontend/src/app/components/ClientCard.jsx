@@ -1,8 +1,8 @@
 import React from 'react'
-import { MapPin, Building2, Server, ArrowRight, Globe, Pencil } from 'lucide-react'
+import { MapPin, Building2, Server, ArrowRight, Globe, Pencil, Trash } from 'lucide-react'
 import Link from 'next/link'
 
-export default function ClientCard({ client, isAdmin = false }) {
+export default function ClientCard({ client, isAdmin = false, onDelete }) {
   return (
     <div className="bg-white dark:bg-[#1c1c1c] rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 p-6 flex flex-col gap-4 transition hover:shadow-lg">
       <div className="flex justify-between items-center">
@@ -20,18 +20,32 @@ export default function ClientCard({ client, isAdmin = false }) {
           </Link>
 
           {isAdmin==="admin" && (
-            <Link
-              href={`/clients/${client.id}/edit`}
-              className="text-yellow-600 dark:text-yellow-400 text-sm flex items-center gap-1 hover:underline"
-            >
-              Edit
-              <Pencil className="w-4 h-4" />
-            </Link>
-          )}
+            <>
+              <Link
+                href={`/clients/${client.id}/edit`}
+                className="text-yellow-600 dark:text-yellow-400 text-sm flex items-center gap-1 hover:underline"
+              >
+                
+                <Pencil className="w-4 h-4" />
+              </Link>
+              <button
+                onClick={onDelete}
+                className="text-red-600 dark:text-red-400 text-sm flex items-center gap-1 hover:underline cursor-pointer"
+              >
+                <Trash className="w-4 h-4" />
+              </button>
+            </>
+          )
+          }
+
         </div>
       </div>
 
       <div className="flex flex-col gap-2 text-sm text-gray-600 dark:text-gray-300">
+      <p className="flex items-center gap-2">
+          <Globe className="w-4 h-4" />
+          {client.client_hostname}
+        </p>
         <p className="flex items-center gap-2">
           <MapPin className="w-4 h-4" />
           {client.client_city}, {client.client_country}
@@ -44,10 +58,7 @@ export default function ClientCard({ client, isAdmin = false }) {
           <Server className="w-4 h-4" />
           Routers: {client.client_routers}
         </p>
-        <p className="flex items-center gap-2">
-          <Globe className="w-4 h-4" />
-          {client.client_hostname}
-        </p>
+        
       </div>
     </div>
   )

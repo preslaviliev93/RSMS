@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from clients.models import Client
+from clients.models import Client, ClientsLogs
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -17,3 +17,9 @@ class ClientSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         ...
+
+
+class ClientsLogsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClientsLogs
+        fields = '__all__'

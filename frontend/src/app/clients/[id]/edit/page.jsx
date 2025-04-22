@@ -63,6 +63,10 @@ export default function EditClientPage() {
     }
   }
 
+  const handleDelete = async () => {
+    
+  }
+
   if (loadingUser || loading) {
     return <div className="p-4">Loading...</div>
   }

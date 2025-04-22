@@ -2,8 +2,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from clients.models import Client
-from clients.serializers import ClientSerializer
+from clients.models import Client, ClientsLogs
+from clients.serializers import ClientSerializer, ClientsLogsSerializer
 from .permissions import IsAdminOrReadOnly
 from .paginations import ClientPagination
 from django.db.models import Q
@@ -34,7 +34,13 @@ class ClientCreateAPIView(APIView):
     def post(self, request):
         serializer = ClientSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            client = serializer.save()
+            ClientsLogs.objects.create(
+                log_type='add',
+                client=client,
+                user=request.user,
+                action=f"Client {client.client_name} was added"
+            )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -62,7 +68,13 @@ class ClientDetailAPIView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = ClientSerializer(client, data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            client = serializer.save()
+            ClientsLogs.objects.create(
+                log_type='update',
+                client=client,
+                user=request.user,
+                action=f"Client {client.client_name} was updated"
+            )
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -70,5 +82,20 @@ class ClientDetailAPIView(APIView):
         client = self.get_object(pk)
         if not client:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            log = ClientsLogs(
+                log_type='delete',
+                client=client,
+                user=request.user,
+                action=f'Client "{client.client_name}" was deleted.'
+            )
+            log.save(force_insert=True)
+            print("Log saved manually:", log.pk)
+        except Exception as e:
+            print("Log failed:", e)
+
         client.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+

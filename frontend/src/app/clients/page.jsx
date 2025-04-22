@@ -6,6 +6,9 @@ import axios from 'axios'
 import ClientCard from '../components/ClientCard'
 import PaginationControls from '../components/PaginationControls'
 import FilterResultsSeaching from '../components/FilterResultsSeaching'
+import toast from 'react-hot-toast'
+import { showDeleteConfirmToast } from '../components/DeleteConfirmationToast'
+
 
 export default function ClientsPage() {
   const { user, loadingUser } = useAuthGuard()
@@ -17,6 +20,32 @@ export default function ClientsPage() {
   const [search, setSearch] = useState('')
   const [role, setRole] = useState('')
   const API_URL = process.env.NEXT_PUBLIC_API_URL
+  
+
+  const handleDelete = (client) => {
+    showDeleteConfirmToast({
+      itemName: client.client_name,
+      onConfirm: async () => {
+        const token = localStorage.getItem('accessToken')
+        await toast.promise(
+          axios.delete(`${API_URL}/clients/all-clients/${client.id}/`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          {
+            loading: 'Deleting...',
+            success: () => {
+              setClients(prev => prev.filter(c => c.id !== client.id))
+              return 'Client deleted!'
+            },
+            error: 'Failed to delete client.',
+          }
+        )
+      }
+    })
+  }
+  
 
   useEffect(() => {
     if (!user) return;
@@ -48,11 +77,6 @@ export default function ClientsPage() {
   }, [user, API_URL])
 
  
-  // const filteredClients = clients.filter(client =>
-  //   Object.values(client)
-  //     .filter(value => typeof value === 'string') // only search string fields
-  //     .some(value => value.toLowerCase().includes(search.toLowerCase()))
-  // )
   const filteredClients = clients.filter(client =>
     Object.values(client)
       .filter(value => typeof value === 'string')
@@ -97,7 +121,7 @@ export default function ClientsPage() {
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {paginatedClients.length > 0 ? (
             paginatedClients.map((client) => (
-              <ClientCard key={client.id} client={client} isAdmin={role} />
+              <ClientCard key={client.id} client={client} isAdmin={role} onDelete={() => handleDelete(client)}/>
             ))
           ) : (
             <p className="text-gray-500 dark:text-gray-400 col-span-full">

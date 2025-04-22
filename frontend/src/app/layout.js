@@ -4,6 +4,7 @@ import Sidebar from "./components/Sidebar";
 import TopNav from "./components/TopNav";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { UserProvider } from "./context/UserContext";
+import {Toaster} from 'react-hot-toast'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,11 +25,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`bg-[var(--background)] text-[var(--font-color)] min-h-screen ${geistSans.variable} ${geistMono.variable}`}>
+      <Toaster position="top-right" />
         <UserProvider>
           <ThemeProvider>
           <div className="flex h-screen overflow-hidden">
-  {/* Fixed Sidebar */}
-  <Sidebar />
+            <Sidebar />
 
   {/* Right section: scrollable content */}
   <div className="flex flex-col flex-1 overflow-hidden">
