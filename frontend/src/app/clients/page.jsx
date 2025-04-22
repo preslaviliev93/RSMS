@@ -15,12 +15,14 @@ export default function ClientsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
   const [search, setSearch] = useState('')
-
+  const [role, setRole] = useState('')
   const API_URL = process.env.NEXT_PUBLIC_API_URL
 
   useEffect(() => {
     if (!user) return;
-
+    const userRole = JSON.parse(localStorage.getItem('userData') || '{}').role || ''
+    setRole(userRole)
+    console.log(`User role: ${userRole}`)
     const fetchClients = async () => {
       setLoading(true)
       try {
@@ -95,7 +97,7 @@ export default function ClientsPage() {
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {paginatedClients.length > 0 ? (
             paginatedClients.map((client) => (
-              <ClientCard key={client.id} client={client} />
+              <ClientCard key={client.id} client={client} isAdmin={role} />
             ))
           ) : (
             <p className="text-gray-500 dark:text-gray-400 col-span-full">

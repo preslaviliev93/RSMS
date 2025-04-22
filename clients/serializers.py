@@ -10,8 +10,9 @@ class ClientSerializer(serializers.ModelSerializer):
 
     def validate_client_name(self, value):
         pk = self.instance.pk if self.instance else None
-        if Client.objects.exclude(pk).filter(client_name__iexcact=value).exists():
+        if Client.objects.exclude(pk=self.instance.pk).filter(client_name__iexact=value).exists():
             raise serializers.ValidationError("A client with this name already exists.")
+        return value
 
 
     def create(self, validated_data):

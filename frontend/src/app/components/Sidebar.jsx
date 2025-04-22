@@ -38,7 +38,6 @@ export default function Sidebar() {
     if (user) {
       const userRole = JSON.parse(localStorage.getItem("userData") || "{}").role || "";
 
-      console.log(`User role: ${userRole}`);
     }
   }, [user, loadingUser, checking]);
 
