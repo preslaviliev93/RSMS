@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 export default function Breadcrumbs() {
   const pathname = usePathname();
 
-  if (!pathname) return null; // ADD THIS LINE 👈
+  if (!pathname) return null;
 
   const pathParts = pathname.split('/').filter(Boolean);
   const buildPath = (index) => '/' + pathParts.slice(0, index + 1).join('/');
