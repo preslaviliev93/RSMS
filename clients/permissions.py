@@ -10,3 +10,6 @@ class IsAdminOrReadOnly(BasePermission):
         if request.method in SAFE_METHODS:
             return request.user.is_authenticated
         return request.user.is_authenticated and request.user.role == 'admin'
+
+class TestPermission(BasePermission):
+    ...

@@ -10,8 +10,10 @@ import {
   Server,
   Info,
   Globe,
-  ShieldCheck
+  ShieldCheck,
+  Clock
 } from 'lucide-react'
+import { formatDateForUI } from '../../utils/formatDate'
 
 export default function ClientDetailsPage() {
   const { id } = useParams()
@@ -68,6 +70,7 @@ export default function ClientDetailsPage() {
         <p className="flex items-center gap-2"><Building2 className="w-4 h-4" /> {client.client_data_center}</p>
         <p className="flex items-center gap-2"><Globe className="w-4 h-4" /> Hostname: {client.client_hostname}</p>
         <p className="flex items-center gap-2"><Server className="w-4 h-4" /> Router Prefix: {client.client_router_prefix}</p>
+        <p className="flex items-center gap-2"><Clock className="w-4 h-4" /> Date added: {formatDateForUI(client.client_added)}</p>
         <p className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> ID: {client.id}</p>
       </div>
 

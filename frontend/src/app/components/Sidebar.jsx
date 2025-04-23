@@ -92,7 +92,7 @@ export default function Sidebar() {
         <>
           {!collapsed && <SidebarSectionTitle>Clients</SidebarSectionTitle>}
           <CustomIconLink href="/clients" icon={<CircleUserRound />} text="Clients" collapsed={collapsed} />
-          <CustomIconLink href="/statistics" icon={<ChartArea />} text="Client Statistics" collapsed={collapsed} />
+          <CustomIconLink href="/statistics" icon={<ChartArea />} text="Statistics" collapsed={collapsed} />
 
           {!collapsed && <SidebarSectionTitle>Network</SidebarSectionTitle>}
           <CustomIconLink href="/routers" icon={<Router />} text="Routers" collapsed={collapsed} />

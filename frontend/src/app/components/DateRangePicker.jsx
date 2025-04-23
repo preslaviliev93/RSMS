@@ -7,7 +7,7 @@ export default function DateRangePicker({ startDate, endDate, setStartDate, setE
   return (
     <div className="flex items-center gap-4">
       <div>
-        <label className="text-sm text-gray-600 dark:text-gray-300">Start Date</label>
+        <label className="text-sm text-gray-600 dark:text-gray-300">Start Date </label>
         <DatePicker
           selected={startDate}
           onChange={(date) => setStartDate(date)}
@@ -18,7 +18,7 @@ export default function DateRangePicker({ startDate, endDate, setStartDate, setE
         />
       </div>
       <div>
-        <label className="text-sm text-gray-600 dark:text-gray-300">End Date</label>
+        <label className="text-sm text-gray-600 dark:text-gray-300">End Date </label>
         <DatePicker
           selected={endDate}
           onChange={(date) => setEndDate(date)}
