@@ -49,7 +49,7 @@ export default function StatisticsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Statistics</h1>
+      <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Home</h1>
 
       <div className="flex flex-wrap items-center gap-4">
         <DateRangePicker

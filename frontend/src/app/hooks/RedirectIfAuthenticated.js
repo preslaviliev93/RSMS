@@ -10,7 +10,7 @@ export function useRedirectIfAuthenticated() {
   useEffect(() => {
     if (!loadingUser) {
       if (user) {
-        router.replace('/servers'); // use replace instead of push to avoid flicker in history
+        router.replace('/home');
       } else {
         setChecking(false);
       }

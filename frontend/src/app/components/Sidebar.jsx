@@ -84,15 +84,20 @@ export default function Sidebar() {
       </div>
      
       {!collapsed && <SidebarSectionTitle>Navigation</SidebarSectionTitle>}
-      <CustomIconLink href="/" icon={<Home />}  text="Home"  collapsed={collapsed} />
-      {user && <CustomIconLink href="/" icon={<UserPen />} text="My Profile" collapsed={collapsed} />}
+      
+      {user &&
+      <>
+        <CustomIconLink href="/home" icon={<Home />}  text="Home"  collapsed={collapsed} />
+        <CustomIconLink href="/" icon={<UserPen />} text="My Profile" collapsed={collapsed} />
+      </>
+      }
       {!user && <CustomIconLink href="/login" icon={<KeyRound />} text="Login" collapsed={collapsed} />}
 
       {user && (
         <>
+          
           {!collapsed && <SidebarSectionTitle>Clients</SidebarSectionTitle>}
           <CustomIconLink href="/clients" icon={<CircleUserRound />} text="Clients" collapsed={collapsed} />
-          <CustomIconLink href="/statistics" icon={<ChartArea />} text="Statistics" collapsed={collapsed} />
 
           {!collapsed && <SidebarSectionTitle>Network</SidebarSectionTitle>}
           <CustomIconLink href="/routers" icon={<Router />} text="Routers" collapsed={collapsed} />
