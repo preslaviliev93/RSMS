@@ -13,7 +13,7 @@ export default function ThemeToggleButton({ collapsed }) {
   return (
     <button
       onClick={toggleTheme}
-      className="w-full flex items-center gap-4 px-2 py-2 text-sm text-[#121212] dark:text-gray-200 hover:bg-[#2c2c2c] transition-colors duration-200 rounded mt-4 md:justify-start justify-center"
+      className="w-full flex items-center gap-4 px-2 py-2 text-sm text-[#121212] dark:text-gray-200 hover:bg-[#ccc] dark:hover:bg-[#2c2c2c] transition-colors duration-200 rounded mt-4 md:justify-start justify-center"
     >
       <span className="flex items-center justify-center w-6 h-6">
         <SunMoon className="w-5 h-5" />

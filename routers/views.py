@@ -7,10 +7,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import RoutersSerializer
 from .paginations import RouterPagination
-from .models import Routers, RouterHeartbeats, RouterInterfaces
+from .models import Routers, RouterHeartbeats, RouterInterfaces, DHCPLeases
 from django.db.models import Q
-from routers.utils import match_client_by_router_identity, update_heartbeat, sync_interfaces
-
+from routers.utils import (match_client_by_router_identity, update_heartbeat, sync_interfaces,
+                           get_router_id_by_router_serial, get_router_client_by_serial)
 
 
 class RouterView(APIView):
@@ -50,7 +50,6 @@ class RouterDetailView(RetrieveAPIView):
     lookup_field = 'id'
 
 
-
 class RegisterRouterView(APIView):
     permission_classes = (AllowAny,)
 
@@ -59,7 +58,6 @@ class RegisterRouterView(APIView):
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
         try:
             data = request.data
-            print(f"GOT DATA: {data}")
             if isinstance(data, dict) and len(data) == 1:
                 raw_data = list(data.keys())[0]
                 data = json.loads(data[raw_data])
@@ -99,3 +97,41 @@ class RegisterRouterView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class RegisterDHCPLeases(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        if request.method.upper() != 'POST':
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        try:
+            data = request.data
+            if isinstance(data, dict) and len(data) == 1:
+                raw_data = list(data.keys())[0]
+                data = json.loads(data[raw_data])
+            # print(f"DHCP INFO {data}")
+            router_serial = data.get('router_serial')
+            router_id = get_router_id_by_router_serial(router_serial)
+            leases = data.get('mac_leases')
+            client = get_router_client_by_serial(router_serial)
+
+            for lease in leases:
+                dhcp_lease, created = DHCPLeases.objects.update_or_create(
+                    router_id=router_id,
+                    mac_address=lease['mac_address'],
+                    defaults={
+                        "mac_address": lease['mac_address'],
+                        "client_id": client,
+                        "dhcp_lease_ip_address": lease['internal_ip'],
+                        "hostname": lease['hostname'],
+                        "added_at": timezone.now()
+                    }
+                )
+
+            return Response({"message": "Router data received and saved."}, status=status.HTTP_201_CREATED)
+
+        except json.JSONDecodeError:
+            return Response({"error": "Invalid JSON format"}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            print(f"Error: {str(e)}")
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

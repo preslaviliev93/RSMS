@@ -9,9 +9,11 @@ import {
   ArrowUp01,
   User,
   Code,
+  Eye,
 } from 'lucide-react';
 import Link from 'next/link';
 import Tooltip from '../components/Tooltip';
+import {formatDateForUI} from '../utils/formatDate';
 
 export default function RouterCard({ router }) {
   if (!router) return null;
@@ -34,16 +36,7 @@ export default function RouterCard({ router }) {
         <div>
           <h4 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">System Info</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Tooltip text="Device hardware">
-              <div className="flex items-center gap-3 p-3 rounded-md bg-gray-50 dark:bg-[#262626] hover:bg-gray-100 dark:hover:bg-[#2f2f2f] transition cursor-default">
-                <div className="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
-                  <Cpu className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{router.router_hardware}</p>
-                </div>
-              </div>
-            </Tooltip>
+           
 
             <Tooltip text="Router uptime">
               <div className="flex items-center gap-3 p-3 rounded-md bg-gray-50 dark:bg-[#262626] hover:bg-gray-100 dark:hover:bg-[#2f2f2f] transition cursor-default">
@@ -52,6 +45,17 @@ export default function RouterCard({ router }) {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{router.router_uptime}</p>
+                </div>
+              </div>
+            </Tooltip>
+
+            <Tooltip text="Last seen">
+              <div className="flex items-center gap-3 p-3 rounded-md bg-gray-50 dark:bg-[#262626] hover:bg-gray-100 dark:hover:bg-[#2f2f2f] transition cursor-default">
+                <div className="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
+                  <Eye  className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{formatDateForUI(router.router_last_seen)}</p>
                 </div>
               </div>
             </Tooltip>
@@ -74,7 +78,7 @@ export default function RouterCard({ router }) {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Client</p>
-                  <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{router.router_client || 'Unknown'}</p>
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{router.router_client?.client_name || 'Unknown'}</p>
                 </div>
               </div>
             </Tooltip>
@@ -131,43 +135,7 @@ export default function RouterCard({ router }) {
           </div>
         </div>
 
-        {/* Interfaces */}
-        {router.interfaces && (
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-700 mt-3">
-            <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">
-              Interfaces
-            </h3>
-            {router.interfaces.length > 0 ? (
-              <div className="flex flex-wrap gap-4">
-                {router.interfaces.map((intf, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col items-center text-center w-14"
-                  >
-                    <Tooltip text={intf.interface_ip || 'No IP assigned'}>
-                      <div
-                        className={`w-8 h-8 rounded-md flex items-center justify-center border transition-colors duration-200 ${
-                          intf.interface_is_active
-                            ? 'bg-emerald-600 border-emerald-700'
-                            : 'bg-rose-800 border-rose-700'
-                        }`}
-                      >
-                        <Network className="w-4 h-4 text-white" />
-                      </div>
-                    </Tooltip>
-                    <span className="text-[10px] text-gray-600 dark:text-gray-400 mt-1">
-                      {intf.interface_name}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                No interfaces found.
-              </p>
-            )}
-          </div>
-        )}
+        
       </div>
 
       {/* View Details */}

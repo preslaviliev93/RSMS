@@ -5,6 +5,8 @@ import { useAuthGuard } from '../hooks/useAuthGuard'
 import FilterResultsSeaching from '../components/FilterResultsSeaching'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
+import PaginationControls from '../components/PaginationControls'
+
 import axios from 'axios'
 
 export default function Routers() {
@@ -14,7 +16,12 @@ export default function Routers() {
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
   const router = useRouter()
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(12)
+  
   const API_URL = process.env.NEXT_PUBLIC_API_URL
+
+
 
   const fetchRouters = async (searchTerm = '') => {
     setLoading(true)
@@ -51,6 +58,16 @@ export default function Routers() {
     fetchRouters(search)
   }, [search])
 
+  const filteredRouters = routers.filter(router =>
+    Object.values(router)
+      .filter(value => typeof value === 'string')
+      .some(value => value.toLowerCase().includes(search.toLowerCase()))
+  )
+  
+  const totalPages = Math.max(1, Math.ceil(filteredRouters.length / pageSize))
+  const startIndex = (currentPage - 1) * pageSize
+  const paginatedRouters = filteredRouters.slice(startIndex, startIndex + pageSize)
+  
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -61,15 +78,17 @@ export default function Routers() {
         type="text"
         placeholder="Search routers..."
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value)
+          setCurrentPage(1)
+        }}
       />
-
       {loading ? (
         <p className="text-center text-gray-500 dark:text-gray-400">Loading routers...</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {routers.length > 0 ? (
-            routers.map((router) => (
+            paginatedRouters.map((router) => (
               <RouterCard key={router.id} router={router} />
             ))
           ) : (
@@ -77,6 +96,17 @@ export default function Routers() {
           )}
         </div>
       )}
+
+      <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              pageSize={pageSize}
+              setPageSize={(value) => {
+                setPageSize(parseInt(value))
+                setCurrentPage(1)
+              }}
+            />
     </div>
   )
 }

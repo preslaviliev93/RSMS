@@ -9,10 +9,18 @@ import {
   Globe,
   Clock,
   Network,
-  Link2,
   ShieldCheck,
-  Activity
+  Activity,
+  EarthLock,
+  CircleDot,
+  Barcode,
+  User,
+  Code,
+  MapPin,
+  Eye,
+  Calendar1
 } from 'lucide-react'
+import { formatDateForUI } from '@/app/utils/formatDate'
 
 export default function RouterDetailsPage() {
   const { user, loadingUser } = useAuthGuard()
@@ -67,16 +75,21 @@ export default function RouterDetailsPage() {
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">Router ID: {id}</p>
       </div>
-
+      {console.log(`Router Info:`, routerInfo)}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-300">
         <InfoRow icon={<Cpu className="w-4 h-4" />} label="Hardware" value={routerInfo.router_hardware} />
         <InfoRow icon={<ShieldCheck className="w-4 h-4" />} label="Model" value={routerInfo.router_model} />
         <InfoRow icon={<Globe className="w-4 h-4" />} label="Public IP" value={routerInfo.router_public_ip} />
         <InfoRow icon={<Network className="w-4 h-4" />} label="Uplink IP" value={routerInfo.router_uplink_ip} />
-        <InfoRow icon={<Link2 className="w-4 h-4" />} label="Tunnel IP" value={routerInfo.router_vpn_mgmt_ip} />
+        <InfoRow icon={<EarthLock  className="w-4 h-4" />} label="Tunnel IP" value={routerInfo.router_vpn_mgmt_ip} />
         <InfoRow icon={<Clock className="w-4 h-4" />} label="Uptime" value={routerInfo.router_uptime} />
-        <InfoRow label="OS Version" value={routerInfo.router_version} />
-        <InfoRow label="Serial" value={routerInfo.router_serial} />
+        <InfoRow icon={<CircleDot className="w-4 h-4" />} label="OS Version" value={routerInfo.router_version} />
+        <InfoRow icon={<Barcode className="w-4 h-4" />} label="Serial" value={routerInfo.router_serial} />
+        <InfoRow icon={<User className="w-4 h-4" />} label="Client" value={routerInfo.router_client?.client_name || "Unknown"} />
+        <InfoRow icon={<Code className="w-4 h-4" />} label="Hardcoded" value={routerInfo.router_hc_client} />
+        <InfoRow icon={<MapPin className="w-4 h-4" />} label="Location Country" value={routerInfo.router_location_country} />
+        <InfoRow icon={<Eye className="w-4 h-4" />} label="Last Seen" value={formatDateForUI(routerInfo.router_last_seen)} />
+        <InfoRow icon={<Calendar1 className="w-4 h-4" />} label="First time registered" value={formatDateForUI(routerInfo.router_added)} />
       </div>
 
       {/* Tunnels */}
@@ -136,30 +149,37 @@ export default function RouterDetailsPage() {
 
       {/* DHCP Leases */}
       {routerInfo.dhcp_leases?.length > 0 && (
-        <div className="mt-8">
-          <h2 className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-100">DHCP Leases</h2>
-          <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
-            <table className="min-w-full text-sm text-left">
-              <thead className="bg-gray-100 dark:bg-[#2a2a2a] text-gray-600 dark:text-gray-300">
-                <tr>
-                  <th className="px-4 py-2">Hostname</th>
-                  <th className="px-4 py-2">MAC Address</th>
-                  <th className="px-4 py-2">Internal IP</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-[#1c1c1c] text-gray-800 dark:text-gray-100">
-                {routerInfo.dhcp_leases.map((lease, index) => (
-                  <tr key={index} className="border-t dark:border-gray-700">
-                    <td className="px-4 py-2">{lease.hostname}</td>
-                    <td className="px-4 py-2">{lease.mac_address}</td>
-                    <td className="px-4 py-2">{lease.internal_ip}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+  <div className="mt-10">
+    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">
+      DHCP Leases
+    </h2>
+
+    <div className="overflow-auto rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+      <table className="min-w-full table-auto text-sm">
+        <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 uppercase text-xs font-semibold">
+          <tr>
+            <th className="px-6 py-3 text-left">Hostname</th>
+            <th className="px-6 py-3 text-left">MAC Address</th>
+            <th className="px-6 py-3 text-left">Internal IP</th>
+          </tr>
+        </thead>
+        <tbody className="bg-white dark:bg-[#1c1c1c] text-gray-800 dark:text-gray-100">
+          {routerInfo.dhcp_leases.map((lease, index) => (
+            <tr
+              key={index}
+              className="hover:bg-gray-50 dark:hover:bg-[#2a2a2a] border-t border-gray-200 dark:border-gray-700 transition"
+            >
+              <td className="px-6 py-3 whitespace-nowrap">{lease.hostname}</td>
+              <td className="px-6 py-3 whitespace-nowrap font-mono">{lease.mac_address}</td>
+              <td className="px-6 py-3 whitespace-nowrap">{lease.dhcp_lease_ip_address}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
+
 
 
 

@@ -101,7 +101,7 @@ export default function Sidebar() {
 
           <button
             onClick={handleLogout}
-            className="my-2 flex items-center md:justify-start justify-center gap-4 px-2 py-2 text-sm text-[#121212] dark:text-gray-200 hover:bg-[#2c2c2c] transition-colors duration-200 rounded w-full"
+            className="my-2 flex items-center md:justify-start justify-center gap-4 px-2 py-2 text-sm text-[#121212] dark:text-gray-200 hover:bg-[#ccc] dark:hover:bg-[#2c2c2c] transition-colors duration-200 rounded w-full"
           >
             <span className="flex items-center justify-center w-6 h-6"><LogOut /></span>
             {!collapsed && <span className="hidden md:inline">Logout</span>}
