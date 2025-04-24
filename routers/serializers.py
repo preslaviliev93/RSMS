@@ -14,7 +14,7 @@ class RouterInterfacesSerializer(serializers.ModelSerializer):
 class DHCPLeasesSerializer(serializers.ModelSerializer):
     class Meta:
         model = DHCPLeases
-        fields = ['mac_address', 'dhcp_lease_ip_address', 'hostname', 'added_at']
+        fields = ['mac_address', 'client_id', 'dhcp_lease_ip_address', 'hostname', 'added_at']
 
 
 class RoutersSerializer(serializers.ModelSerializer):

@@ -1,6 +1,6 @@
 
 import React from 'react'
-import { MapPin, Building2, Server, ArrowRight, Globe, Pencil, Trash } from 'lucide-react'
+import { MapPin, Building2, Server, ArrowRight, Globe, Pencil, Trash, Monitor, Router } from 'lucide-react'
 import Link from 'next/link'
 import Tooltip from '../components/Tooltip';
 
@@ -60,11 +60,21 @@ export default function ClientCard({ client, isAdmin = false, onDelete }) {
           <Building2 className="w-4 h-4" />
           {client.client_data_center}
         </p>
-        <p className="flex items-center gap-2">
-          <Server className="w-4 h-4" />
-          Routers: {client.client_routers}
-        </p>
+        <Link
+            href={`/clients/${client.id}/routers`}
+            className="text-blue-600 dark:text-blue-400 text-sm flex items-center gap-1 hover:underline"
+          >
+            <Router className="w-4 h-4" />
+            Routers: {client.routers_count || 0}
+        </Link>
         
+        <Link
+            href={`/clients/${client.id}/machines`}
+            className="text-blue-600 dark:text-blue-400 text-sm flex items-center gap-1 hover:underline"
+          >
+            <Monitor className="w-4 h-4" />
+            Machines: {client.routers_count || 0}
+        </Link>
       </div>
     </div>
   )

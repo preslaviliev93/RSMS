@@ -5,9 +5,9 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import RoutersSerializer
-from .paginations import RouterPagination
-from .models import Routers, RouterHeartbeats, RouterInterfaces, DHCPLeases
+from .serializers import RoutersSerializer, DHCPLeasesSerializer
+from .paginations import RouterPagination, DHCPLeasesPagination
+from .models import Routers,  DHCPLeases
 from django.db.models import Q
 from routers.utils import (match_client_by_router_identity, update_heartbeat, sync_interfaces,
                            get_router_id_by_router_serial, get_router_client_by_serial)
@@ -37,6 +37,10 @@ class RouterView(APIView):
                 Q(router_last_seen__icontains=search) |
                 Q(router_added__icontains=search)
             )
+        client_id = request.query_params.get('client_id')
+        if client_id:
+            routers = routers.filter(router_client_id=client_id)
+
         paginator = RouterPagination()
         result_page = paginator.paginate_queryset(routers, request)
         serializer = RoutersSerializer(result_page, many=True)
@@ -135,3 +139,27 @@ class RegisterDHCPLeases(APIView):
         except Exception as e:
             print(f"Error: {str(e)}")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class ClientDHCPLeasesView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        client_id = request.query_params.get('client_id')
+        if not client_id:
+            return Response({"error": "Missing client_id parameter."}, status=status.HTTP_400_BAD_REQUEST)
+
+        leases = DHCPLeases.objects.filter(client_id=client_id).order_by('-added_at')
+
+        paginator = DHCPLeasesPagination()
+        result_page = paginator.paginate_queryset(leases, request)
+        serializer = DHCPLeasesSerializer(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+
+
+
+
+
+
