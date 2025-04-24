@@ -1,6 +1,8 @@
+
 import React from 'react'
 import { MapPin, Building2, Server, ArrowRight, Globe, Pencil, Trash } from 'lucide-react'
 import Link from 'next/link'
+import Tooltip from '../components/Tooltip';
 
 export default function ClientCard({ client, isAdmin = false, onDelete }) {
   return (
@@ -21,19 +23,23 @@ export default function ClientCard({ client, isAdmin = false, onDelete }) {
 
           {isAdmin==="admin" && (
             <>
-              <Link
-                href={`/clients/${client.id}/edit`}
-                className="text-yellow-600 dark:text-yellow-400 text-sm flex items-center gap-1 hover:underline"
-              >
-                
-                <Pencil className="w-4 h-4" />
-              </Link>
-              <button
-                onClick={onDelete}
-                className="text-red-600 dark:text-red-400 text-sm flex items-center gap-1 hover:underline cursor-pointer"
-              >
-                <Trash className="w-4 h-4" />
-              </button>
+              <Tooltip text="Edit client" position="top">
+                <Link
+                  href={`/clients/${client.id}/edit`}
+                  className="text-yellow-600 dark:text-yellow-400 text-sm flex items-center gap-1 hover:underline"
+                >
+                  
+                  <Pencil className="w-4 h-4" />
+                </Link>
+              </Tooltip>
+              <Tooltip text="Delete client" position="top">
+                <button
+                  onClick={onDelete}
+                  className="text-red-600 dark:text-red-400 text-sm flex items-center gap-1 hover:underline cursor-pointer"
+                >
+                  <Trash className="w-4 h-4" />
+                </button>
+              </Tooltip>
             </>
           )
           }

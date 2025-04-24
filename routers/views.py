@@ -1,5 +1,6 @@
 import json
 from django.utils import timezone
+from rest_framework.generics import RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -42,6 +43,14 @@ class RouterView(APIView):
         return paginator.get_paginated_response(serializer.data)
 
 
+class RouterDetailView(RetrieveAPIView):
+    queryset = Routers.objects.all()
+    serializer_class = RoutersSerializer
+    permission_classes = (IsAuthenticated,)
+    lookup_field = 'id'
+
+
+
 class RegisterRouterView(APIView):
     permission_classes = (AllowAny,)
 
@@ -50,6 +59,7 @@ class RegisterRouterView(APIView):
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
         try:
             data = request.data
+            print(f"GOT DATA: {data}")
             if isinstance(data, dict) and len(data) == 1:
                 raw_data = list(data.keys())[0]
                 data = json.loads(data[raw_data])
@@ -69,7 +79,7 @@ class RegisterRouterView(APIView):
                     "router_identity": router_identity,
                     "router_uplink_ip": data.get("router_uplink_ip"),
                     "router_public_ip": data.get("router_public_ip"),
-                    "router_tunnel_ip": data.get("router_tunnel_ip"),
+                    "router_vpn_mgmt_ip": data.get("router_tunnel_ip"),
                     "router_uptime": data.get("router_uptime"),
                     "router_client": matched_client,
                     "router_last_seen": timezone.now()

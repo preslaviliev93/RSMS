@@ -9,7 +9,7 @@ import FilterResultsSeaching from '../components/FilterResultsSeaching'
 import toast from 'react-hot-toast'
 import { showDeleteConfirmToast } from '../components/DeleteConfirmationToast'
 import AddClientModal from '../components/AddClientModal'
-
+import { useRouter } from 'next/navigation'
 
 export default function ClientsPage() {
   const { user, loadingUser } = useAuthGuard()
@@ -20,6 +20,7 @@ export default function ClientsPage() {
   const [pageSize, setPageSize] = useState(12)
   const [search, setSearch] = useState('')
   const [role, setRole] = useState('')
+  const router = useRouter()
   const API_URL = process.env.NEXT_PUBLIC_API_URL
   
 
@@ -70,7 +71,9 @@ export default function ClientsPage() {
   }
   
   useEffect(() => {
-    if (!user) return;
+    if (!user){
+      router.push('/login')
+    };
     const userRole = JSON.parse(localStorage.getItem('userData') || '{}').role || ''
     setRole(userRole)
     console.log(`User role: ${userRole}`)
