@@ -73,7 +73,7 @@ export default function ClientCard({ client, isAdmin = false, onDelete }) {
             className="text-blue-600 dark:text-blue-400 text-sm flex items-center gap-1 hover:underline"
           >
             <Monitor className="w-4 h-4" />
-            Machines: {client.routers_count || 0}
+            Machines: {client.dhcp_leases_count || 0}
         </Link>
       </div>
     </div>

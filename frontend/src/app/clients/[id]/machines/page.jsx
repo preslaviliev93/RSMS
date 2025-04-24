@@ -77,6 +77,7 @@ export default function ClientMachinesPage() {
                 <th className="px-6 py-3 text-left">Hostname</th>
                 <th className="px-6 py-3 text-left">MAC Address</th>
                 <th className="px-6 py-3 text-left">Internal IP</th>
+                <th className="px-6 py-3 text-left">Router S/N</th>
                 <th className="px-6 py-3 text-left">Added At</th>
               </tr>
             </thead>
@@ -86,6 +87,7 @@ export default function ClientMachinesPage() {
                   <td className="px-6 py-3">{lease.hostname}</td>
                   <td className="px-6 py-3 font-mono">{lease.mac_address}</td>
                   <td className="px-6 py-3">{lease.internal_ip || lease.dhcp_lease_ip_address}</td>
+                  <td className="px-6 py-3">{lease.router_serial}</td>
                   <td className="px-6 py-3 text-sm text-gray-500">
                     {new Date(lease.added_at).toLocaleString()}
                   </td>
