@@ -5,16 +5,16 @@ import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { format, subDays, startOfMonth, endOfMonth } from 'date-fns'
 import DateRangePicker from '../components/DateRangePicker'
+import StatTabs from '../components/StatTabs'
 
-const StatisticsChart = dynamic(() => import('../components/StatisticsChart'), {
-  ssr: false // IMPORTANT: prevents "window is not defined"
-})
+const StatisticsChart = dynamic(() => import('../components/StatisticsChart'), { ssr: false })
 
 export default function StatisticsPage() {
   const today = new Date()
   const [startDate, setStartDate] = useState(today)
   const [endDate, setEndDate] = useState(today)
-  const [data, setData] = useState({ clients: [], logs: [] })
+  const [data, setData] = useState({ clients: [], logs: [], routers: [], macs: [] })
+  const [activeTab, setActiveTab] = useState('clients')
 
   const fetchStats = async (start, end) => {
     try {
@@ -48,8 +48,8 @@ export default function StatisticsPage() {
   }
 
   return (
-    <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Client Statistics</h1>
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Statistics</h1>
 
       <div className="flex flex-wrap items-center gap-4">
         <DateRangePicker
@@ -60,19 +60,21 @@ export default function StatisticsPage() {
         />
 
         <div className="flex gap-2">
-          <button onClick={() => handleQuickRange('today')} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded">
-            Today
-          </button>
-          <button onClick={() => handleQuickRange('last7')} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded">
-            Last 7 Days
-          </button>
-          <button onClick={() => handleQuickRange('thisMonth')} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded">
-            This Month
-          </button>
+          <button onClick={() => handleQuickRange('today')} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded">Today</button>
+          <button onClick={() => handleQuickRange('last7')} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded">Last 7 Days</button>
+          <button onClick={() => handleQuickRange('thisMonth')} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded">This Month</button>
         </div>
       </div>
+      {console.log("📊 DATA SENT TO STATTABS:", JSON.stringify(data, null, 2))}
+      <StatTabs data={data} activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <StatisticsChart clients={data.clients} logs={data.logs} />
+      <StatisticsChart
+        clients={data.clients}
+        logs={data.logs}
+        routers={data.routers}
+        macs={data.macs}
+        activeTab={activeTab}
+      />
     </div>
   )
 }
