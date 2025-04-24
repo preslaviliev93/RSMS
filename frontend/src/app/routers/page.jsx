@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import PaginationControls from '../components/PaginationControls'
 
 import axios from 'axios'
+import { Activity } from 'lucide-react'
 
 export default function Routers() {
   const { user, loadingUser } = useAuthGuard()
@@ -68,6 +69,8 @@ export default function Routers() {
   const startIndex = (currentPage - 1) * pageSize
   const paginatedRouters = filteredRouters.slice(startIndex, startIndex + pageSize)
   
+
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">

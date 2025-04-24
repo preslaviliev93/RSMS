@@ -12,10 +12,22 @@ class RouterInterfacesSerializer(serializers.ModelSerializer):
 
 
 class DHCPLeasesSerializer(serializers.ModelSerializer):
+    client_name = serializers.SerializerMethodField()
+    router_serial = serializers.SerializerMethodField()
+    router_id = serializers.SerializerMethodField()
+
     class Meta:
         model = DHCPLeases
-        fields = ['mac_address', 'client_id', 'dhcp_lease_ip_address', 'hostname', 'added_at']
+        fields = ['mac_address', 'client_id', 'dhcp_lease_ip_address', 'hostname', 'added_at',
+                  'client_name', 'router_serial', 'router_id']
 
+    def get_client_name(self, obj):
+        return obj.client_id.client_name if obj.client_id else None
+    def get_router_serial(self, obj):
+        return obj.router_id.router_serial if obj.router_id else None
+
+    def get_router_id(self, obj):
+        return obj.router_id.id if obj.router_id else None
 
 class RoutersSerializer(serializers.ModelSerializer):
     interfaces = RouterInterfacesSerializer(many=True, read_only=True)

@@ -10,12 +10,28 @@ import {
   User,
   Code,
   Eye,
+  
 } from 'lucide-react';
 import Link from 'next/link';
 import Tooltip from '../components/Tooltip';
 import {formatDateForUI} from '../utils/formatDate';
 
 export default function RouterCard({ router }) {
+
+    function getRouterStatus(lastSeen) {
+      const last = new Date(lastSeen)
+      const diffMins = (Date.now() - last.getTime()) / 1000 / 60
+      if(diffMins < 10) {
+        return <span className="text-green-700 text-xs"><Activity/></span>
+      } else if(diffMins < 1440) {
+        return <span className="text-yellow-700 text-xs"><Activity/></span>
+      } else {
+        return <span className="text-red-700 text-xs"><Activity/></span>
+      }
+    }
+  
+
+
   if (!router) return null;
 
   return (
@@ -50,13 +66,16 @@ export default function RouterCard({ router }) {
             </Tooltip>
 
             <Tooltip text="Last seen">
+              
               <div className="flex items-center gap-3 p-3 rounded-md bg-gray-50 dark:bg-[#262626] hover:bg-gray-100 dark:hover:bg-[#2f2f2f] transition cursor-default">
                 <div className="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
                   <Eye  className="w-4 h-4 text-gray-700 dark:text-gray-300" />
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{formatDateForUI(router.router_last_seen)}</p>
-                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Last seen: {new Date(router.router_last_seen).toLocaleString()}
+                </p>
+                {getRouterStatus(router.router_last_seen)}
+                
               </div>
             </Tooltip>
 

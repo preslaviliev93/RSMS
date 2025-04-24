@@ -163,3 +163,19 @@ class ClientDHCPLeasesView(APIView):
 
 
 
+class AllMachinesView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        search = request.query_params.get('search', None)
+        leases = DHCPLeases.objects.all().order_by('-added_at')
+        if search:
+            leases = leases.filter(
+                Q(hostname__icontains=search) |
+                Q(mac_address__icontains=search) |
+                Q(dhcp_lease_ip_address__icontains=search)
+            )
+        paginator = DHCPLeasesPagination()
+        result_page = paginator.paginate_queryset(leases, request)
+        serializer = DHCPLeasesSerializer(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data)
