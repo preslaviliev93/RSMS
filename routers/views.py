@@ -83,7 +83,7 @@ class RegisterRouterView(APIView):
                     "router_public_ip": data.get("router_public_ip"),
                     "router_vpn_mgmt_ip": data.get("router_tunnel_ip"),
                     "router_uptime": data.get("router_uptime"),
-                    "router_location_country": data.get("router_location_country"),
+                    "router_location_country": data.get("router_location_country", ""),
                     "router_client": matched_client,
                     "router_last_seen": timezone.now()
                 }

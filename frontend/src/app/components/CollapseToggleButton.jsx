@@ -11,7 +11,6 @@ export default function CollapseToggleButton({ collapsed, setCollapsed }) {
         text-gray-700 dark:text-gray-300 
         hover:text-black dark:hover:text-white 
         hover:bg-gray-200 dark:hover:bg-[#2c2c2c]
-        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400
         mt-5
       `}
       aria-label="Toggle sidebar"

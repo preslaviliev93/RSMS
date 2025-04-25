@@ -59,7 +59,6 @@ export default function AllMachinesPage() {
     }
   }, [user, loadingUser])
 
-  // Search filtering (now includes client_name!)
   const filteredLeases = leases.filter(lease =>
     [lease.hostname, lease.mac_address, lease.dhcp_lease_ip_address, lease.client_name]
       .filter(val => typeof val === 'string')
@@ -134,7 +133,7 @@ export default function AllMachinesPage() {
                         
                       </Link>
                     </td>
-                    {console.log(lease)}
+                    {/* {console.log(lease)} */}
                     
                     <td className="px-4 py-2 text-xs text-gray-500">{new Date(lease.added_at).toLocaleString()}</td>
                   </tr>
