@@ -59,7 +59,7 @@ export default function ClientRoutersPage() {
   }
 
   useEffect(() => {
-    if (!user && !loadingUser) {
+    if (!loadingUser && !user) {
       router.push('/login')
     }
     if (user) {
@@ -68,6 +68,7 @@ export default function ClientRoutersPage() {
     }
   }, [user, loadingUser])
 
+  if(loadingUser || !user) return null
   const totalPages = Math.max(1, Math.ceil(routers.length / pageSize))
   const paginated = routers.slice((currentPage - 1) * pageSize, currentPage * pageSize)
 

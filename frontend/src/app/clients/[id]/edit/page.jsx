@@ -9,7 +9,6 @@ export default function EditClientPage() {
   const { user, loadingUser } = useAuthGuard()
   const router = useRouter()
   const { id } = useParams()
-
   const [formData, setFormData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -17,15 +16,20 @@ export default function EditClientPage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL
 
   useEffect(() => {
-    if (!user || loadingUser) return
+    if (loadingUser) return; 
+  if (!user) {
+    router.replace('/login')
+    return
+  }
 
-    if (user.role !== 'admin') {
-      router.replace('/clients')
-      return
-    }
+  if (user.role !== 'admin') {
+    router.replace('/clients')
+    return
+  }
 
     const fetchClient = async () => {
       try {
+        user
         const token = localStorage.getItem('accessToken')
         const response = await axios.get(`${API_URL}/clients/all-clients/${id}/`, {
             headers: {
@@ -74,6 +78,7 @@ export default function EditClientPage() {
   if (error) {
     return <p className="text-red-500 p-4">{error}</p>
   }
+  if (!user || loadingUser) return
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white dark:bg-[#1c1c1c] rounded-xl shadow-lg mt-8">

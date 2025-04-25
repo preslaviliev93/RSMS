@@ -76,6 +76,7 @@ export default function ProfilePage() {
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
+  if (loadingUser || !user) return null
 
   return (
     <div className="min-h-screen p-6 text-gray-800 dark:text-gray-100">

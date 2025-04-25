@@ -24,7 +24,13 @@ export default function AllMachinesPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
 
+
+
   const fetchLeases = async () => {
+    if (loadingUser) return
+    if (!user){
+      router.push('/login')
+    }
     setLoading(true)
     try {
       const token = localStorage.getItem('accessToken')
@@ -67,6 +73,9 @@ export default function AllMachinesPage() {
     navigator.clipboard.writeText(text)
     toast.success('Copied to clipboard!')
   }
+
+  
+  if (loadingUser || !user) return 
 
   return (
     <div className="space-y-6">

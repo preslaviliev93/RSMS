@@ -71,9 +71,11 @@ export default function ClientsPage() {
   }
   
   useEffect(() => {
-    if (!user){
+    if(loadingUser) return
+    if (!user) {
       router.push('/login')
-    };
+      return
+    }
     const userRole = JSON.parse(localStorage.getItem('userData') || '{}').role || ''
     setRole(userRole)
     console.log(`User role: ${userRole}`)

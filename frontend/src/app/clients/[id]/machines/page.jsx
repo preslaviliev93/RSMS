@@ -6,6 +6,7 @@ import axios from 'axios'
 import { useAuthGuard } from '../../../hooks/useAuthGuard'
 import toast from 'react-hot-toast'
 
+
 export default function ClientMachinesPage() {
   const { id: clientId } = useParams()
   const router = useRouter()
@@ -60,7 +61,7 @@ export default function ClientMachinesPage() {
       fetchLeases()
     }
   }, [user, loadingUser])
-
+  if (loadingUser || !user) return null // Prevent rendering until user is loaded
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white">

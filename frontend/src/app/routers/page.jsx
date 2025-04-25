@@ -19,10 +19,18 @@ export default function Routers() {
   const router = useRouter()
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
-  
   const API_URL = process.env.NEXT_PUBLIC_API_URL
+  if (loadingUser || !user) {
+    return null;
+  }
 
-
+  useEffect(() => {
+    if (loadingUser) return;
+    if (!user) {
+      router.replace('/login')
+    }
+    fetchRouters(search)
+  }, [user, loadingUser, search])
 
   const fetchRouters = async (searchTerm = '') => {
     setLoading(true)
@@ -46,19 +54,6 @@ export default function Routers() {
     }
   }
 
-  useEffect(() => {
-    if (!user && !loadingUser) {
-      router.push('/login')
-    }
-    if (user) {
-      fetchRouters(search)
-    }
-  }, [user, loadingUser])
-
-  useEffect(() => {
-    fetchRouters(search)
-  }, [search])
-
   const filteredRouters = routers.filter(router =>
     Object.values(router)
       .filter(value => typeof value === 'string')
@@ -69,7 +64,11 @@ export default function Routers() {
   const startIndex = (currentPage - 1) * pageSize
   const paginatedRouters = filteredRouters.slice(startIndex, startIndex + pageSize)
   
-
+ 
+  if (loadingUser) {
+    return null
+  }
+  
 
   return (
     <div className="space-y-6">
