@@ -76,7 +76,7 @@ export default function Routers() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Routers</h1>
       </div>
-
+      
       <FilterResultsSeaching
         type="text"
         placeholder="Search routers..."
@@ -89,6 +89,10 @@ export default function Routers() {
       {loading ? (
         <p className="text-center text-gray-500 dark:text-gray-400">Loading routers...</p>
       ) : (
+        <>
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          Showing {filteredRouters.length} of {routers.length} routers
+        </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {routers.length > 0 ? (
             paginatedRouters.map((router) => (
@@ -98,6 +102,7 @@ export default function Routers() {
             <p className="text-gray-600 dark:text-gray-400">No routers found.</p>
           )}
         </div>
+        </>
       )}
 
       <PaginationControls

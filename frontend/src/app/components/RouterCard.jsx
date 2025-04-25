@@ -10,6 +10,7 @@ import {
   User,
   Code,
   Eye,
+  Map,
   
 } from 'lucide-react';
 import Link from 'next/link';
@@ -148,6 +149,19 @@ export default function RouterCard({ router }) {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{router.router_vpn_mgmt_ip}</p>
+                </div>
+              </div>
+            </Tooltip>
+
+
+
+            <Tooltip text="Country of origin">
+              <div className="flex items-center gap-3 p-3 rounded-md bg-gray-50 dark:bg-[#262626] hover:bg-gray-100 dark:hover:bg-[#2f2f2f] transition cursor-default">
+                <div className="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
+                  <Map className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{router.router_location_country || "Unknown Location"}</p>
                 </div>
               </div>
             </Tooltip>
