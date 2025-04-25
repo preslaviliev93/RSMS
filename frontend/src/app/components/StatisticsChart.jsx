@@ -18,7 +18,7 @@ import CountUp from 'react-countup'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Legend, Filler, zoomPlugin)
 
-export default function StatisticsChart({ clients = [], logs = [], routers = [], machines = [] }) {
+export default function StatisticsChart({ clients = [], logs = [], routers = [], machines = [], total_heartbeats = 0 }) {
   const chartRef = useRef()
   const [chartType, setChartType] = useState('line')
   const [autoRefresh, setAutoRefresh] = useState(true)
@@ -51,7 +51,13 @@ export default function StatisticsChart({ clients = [], logs = [], routers = [],
       label: 'Machines',
       color: 'rgb(139, 92, 246)',
       data: formatData(machines),
-    }
+    },
+    hb: {
+      label: 'hb',
+      color: 'rgb(139, 92, 246)',
+      data: total_heartbeats,
+    },
+    
   }
 
   const activeDataset = datasetsMap[activeTab]

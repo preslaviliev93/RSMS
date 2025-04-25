@@ -73,6 +73,7 @@ export default function StatisticsPage() {
         logs={data.logs}
         routers={data.routers}
         macs={data.macs}
+        total_heartbeats={data.total_heartbeats}
         activeTab={activeTab}
       />
     </div>

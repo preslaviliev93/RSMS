@@ -8,6 +8,8 @@ import FilterResultsSeaching from '../components/FilterResultsSeaching'
 import { useRouter } from 'next/navigation'
 import ToastMessage from '../components/ToastMessage'
 
+const LOG_TYPES = ['All', 'Login', 'Logout', 'add', 'edit', 'delete']
+
 export default function Logs() {
   const { user, loadingUser } = useAuthGuard()
   const [logs, setLogs] = useState([])
@@ -17,6 +19,7 @@ export default function Logs() {
   const [pageSize, setPageSize] = useState(12)
   const [search, setSearch] = useState('')
   const [showToast, setShowToast] = useState(false)
+  const [selectedLogType, setSelectedLogType] = useState('All')
   const router = useRouter()
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -25,7 +28,6 @@ export default function Logs() {
     if (!user || loadingUser) return
 
     const userRole = JSON.parse(localStorage.getItem('userData') || '{}').role || ''
-
     if (userRole !== 'admin') {
       setShowToast(true)
       setTimeout(() => router.push('/home'), 2000)
@@ -36,10 +38,10 @@ export default function Logs() {
       setLoading(true)
       try {
         const token = localStorage.getItem('accessToken')
-        const res = await axios.get(`${API_URL}/clients/logs/`, {
+        const res = await axios.get(`${API_URL}/logs/`, {
           headers: { Authorization: `Bearer ${token}` },
         })
-        setLogs(res.data.results || res.data)
+        setLogs(res.data)
       } catch (err) {
         setError('Failed to fetch logs')
       } finally {
@@ -67,7 +69,8 @@ export default function Logs() {
   }
 
   const filteredLogs = logs.filter((log) => {
-    return Object.values(log).some((val) => {
+    const matchesType = selectedLogType === 'All' || log.log_type === selectedLogType
+    const matchesSearch = Object.values(log).some((val) => {
       if (typeof val === 'string') return val.toLowerCase().includes(search.toLowerCase())
       if (typeof val === 'object' && val !== null) {
         return Object.values(val).some(
@@ -76,6 +79,7 @@ export default function Logs() {
       }
       return false
     })
+    return matchesType && matchesSearch
   })
 
   const totalPages = Math.max(1, Math.ceil(filteredLogs.length / pageSize))
@@ -84,29 +88,48 @@ export default function Logs() {
 
   return (
     <div className="flex flex-col min-h-full gap-4 px-6 py-4">
-      <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Client Logs</h1>
-      <FilterResultsSeaching
-        type="text"
-        placeholder="Search logs..."
-        value={search}
-        onChange={(e) => {
-          setSearch(e.target.value)
-          setCurrentPage(1)
-        }}
-      />
+      <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Logs</h1>
+
+      <div className="flex gap-4">
+        <FilterResultsSeaching
+          type="text"
+          placeholder="Search logs..."
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value)
+            setCurrentPage(1)
+          }}
+        />
+
+        <select
+          className="border rounded-lg px-3 py-2 bg-white dark:bg-[#1c1c1c] dark:text-gray-200"
+          value={selectedLogType}
+          onChange={(e) => {
+            setSelectedLogType(e.target.value)
+            setCurrentPage(1)
+          }}
+        >
+          {LOG_TYPES.map((type) => (
+            <option key={type} value={type}>
+              {type}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <p className="text-sm text-gray-600 dark:text-gray-300">
-        Showing {paginatedLogs.length} / {logs.length} logs
+        Showing {paginatedLogs.length} / {filteredLogs.length} logs
       </p>
 
       <div className="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-100 dark:bg-[#2c2c2c]">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Type</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Client</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">User</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Message</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Date</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">Type</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">Client</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">User</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">Message</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">Date</th>
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-[#1c1c1c] divide-y divide-gray-100 dark:divide-gray-800">
@@ -115,18 +138,25 @@ export default function Logs() {
                 <td className="px-4 py-2 text-sm font-medium">
                   <span
                     className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
-                      ${log.log_type === 'add' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
-                      log.log_type === 'edit' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
-                      log.log_type === 'delete' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
-                      'bg-gray-100 text-gray-800 dark:bg-gray-700/30 dark:text-gray-300'}`}
+                      ${log.log_type === 'add' ? 'bg-green-100 text-green-800' :
+                      log.log_type === 'edit' ? 'bg-yellow-100 text-yellow-800' :
+                      log.log_type === 'delete' ? 'bg-red-100 text-red-800' :
+                      'bg-gray-100 text-gray-800'}`}
                   >
                     {log.log_type}
                   </span>
                 </td>
-                <td className="px-4 py-2 text-sm text-gray-800 dark:text-gray-100">{log.client?.client_name || '—'}</td>
-                <td className="px-4 py-2 text-sm text-gray-800 dark:text-gray-100">{log.user?.username || '—'}</td>
-                <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{log.action}</td>
-                <td className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
+                <td className="px-4 py-2 text-sm">
+                  {log.client?.client_name || '—'}
+                </td>
+                <td className="px-4 py-2 text-sm">
+                  {log.username || log.user?.username || '—'}
+                  {console.log('Logs:', JSON.stringify(logs, null, 2))}
+                </td>
+                <td className="px-4 py-2 text-sm">
+                  {log.action || log.message || '—'}
+                </td>
+                <td className="px-4 py-2 text-sm text-gray-500">
                   {new Date(log.timestamp).toLocaleString()}
                 </td>
               </tr>

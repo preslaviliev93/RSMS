@@ -6,5 +6,6 @@ urlpatterns = [
     path('all-clients/<int:pk>/', ClientDetailAPIView.as_view(), name='client-detail'),
     path('logs/', ClientLogView.as_view(), name='client-logs'),
 
+
 ]
 

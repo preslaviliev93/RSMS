@@ -78,16 +78,6 @@ export async function logout(){
 }
 
 
-// export function isLoggedIn(){
-//     try{
-//         const token = getAccessToken();
-//         if(!token) return false;
-//         return !!token;
-//     }catch(error){
-//         console.warn(`Something went wrong while checking if user is logged in: ${error}`);
-//         return false;
-//     }
-// }
 
 export function isLoggedIn(){
     const token = getAccessToken();

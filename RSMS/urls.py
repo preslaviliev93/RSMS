@@ -8,4 +8,5 @@ urlpatterns = [
     path('clients/', include('clients.urls')),
     path('statistics/', include('stats.urls')),
     path('routers/', include('routers.urls')),
+    path('logs/', include('logging_services.urls'))
 ]
