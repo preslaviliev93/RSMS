@@ -88,7 +88,7 @@ export default function Sidebar() {
       {user &&
       <>
         <CustomIconLink href="/home" icon={<Home />}  text="Home"  collapsed={collapsed} />
-        <CustomIconLink href="/" icon={<UserPen />} text="My Profile" collapsed={collapsed} />
+        <CustomIconLink href="/profile" icon={<UserPen />} text="My Profile" collapsed={collapsed} />
       </>
       }
       {!user && <CustomIconLink href="/login" icon={<KeyRound />} text="Login" collapsed={collapsed} />}

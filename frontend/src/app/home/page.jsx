@@ -65,7 +65,7 @@ export default function StatisticsPage() {
           <button onClick={() => handleQuickRange('thisMonth')} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded">This Month</button>
         </div>
       </div>
-      {console.log("📊 DATA SENT TO STATTABS:", JSON.stringify(data, null, 2))}
+      {/* {console.log("DATA SENT TO STATTABS:", JSON.stringify(data, null, 2))} //LEFT FOR DEBUG */}
       <StatTabs data={data} activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <StatisticsChart

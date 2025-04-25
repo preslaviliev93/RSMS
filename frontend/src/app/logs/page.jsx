@@ -151,7 +151,7 @@ export default function Logs() {
                 </td>
                 <td className="px-4 py-2 text-sm">
                   {log.username || log.user?.username || '—'}
-                  {console.log('Logs:', JSON.stringify(logs, null, 2))}
+                  {/* {console.log('Logs:', JSON.stringify(logs, null, 2))} */}
                 </td>
                 <td className="px-4 py-2 text-sm">
                   {log.action || log.message || '—'}
