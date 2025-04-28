@@ -14,25 +14,14 @@ export default function Routers() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
-  const router = useRouter()
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
+  const [totalCount, setTotalCount] = useState(0) // total number of routers from backend
 
+  const router = useRouter()
   const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-  // ✅ Only run effect after auth is loaded
-  useEffect(() => {
-    if (!loadingUser && !user) {
-      router.replace('/login')
-      return
-    }
-
-    if (user) {
-      fetchRouters(search)
-    }
-  }, [user, loadingUser, search])
-
-  const fetchRouters = async (searchTerm = '') => {
+  const fetchRouters = async (searchTerm = '', page = 1, pageSize = 12) => {
     try {
       setLoading(true)
       const token = localStorage.getItem('accessToken')
@@ -41,11 +30,13 @@ export default function Routers() {
           Authorization: `Bearer ${token}`,
         },
         params: {
-          page_size: 9999,
           search: searchTerm,
+          page,
+          page_size: pageSize,
         },
       })
       setRouters(response.data.results)
+      setTotalCount(response.data.count)
     } catch (error) {
       setError(error.response?.data?.message || 'An error occurred')
       toast.error('Failed to fetch routers.')
@@ -54,21 +45,21 @@ export default function Routers() {
     }
   }
 
-  // ✅ While auth is loading, don’t render anything
-  if (loadingUser) return null
+  useEffect(() => {
+    if (!loadingUser && !user) {
+      router.replace('/login')
+      return
+    }
 
-  // ✅ If not logged in (but auth is ready), stop render
+    if (user) {
+      fetchRouters(search, currentPage, pageSize)
+    }
+  }, [user, loadingUser, search, currentPage, pageSize])
+
+  if (loadingUser) return null
   if (!user) return null
 
-  const filteredRouters = routers.filter(router =>
-    Object.values(router)
-      .filter(value => typeof value === 'string')
-      .some(value => value.toLowerCase().includes(search.toLowerCase()))
-  )
-
-  const totalPages = Math.max(1, Math.ceil(filteredRouters.length / pageSize))
-  const startIndex = (currentPage - 1) * pageSize
-  const paginatedRouters = filteredRouters.slice(startIndex, startIndex + pageSize)
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
 
   return (
     <div className="space-y-6">
@@ -91,11 +82,11 @@ export default function Routers() {
       ) : (
         <>
           <p className="text-sm text-gray-600 dark:text-gray-300">
-            Showing {filteredRouters.length} of {routers.length} routers
+            Showing {routers.length} of {totalCount} (Page {currentPage} of {totalPages})
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {routers.length > 0 ? (
-              paginatedRouters.map((router) => (
+              routers.map((router) => (
                 <RouterCard key={router.id} router={router} />
               ))
             ) : (

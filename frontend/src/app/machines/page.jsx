@@ -11,8 +11,6 @@ import { Clipboard } from 'lucide-react'
 import Tooltip from '../components/Tooltip'
 import Link from 'next/link'
 
-
-
 export default function AllMachinesPage() {
   const { user, loadingUser } = useAuthGuard()
   const router = useRouter()
@@ -23,13 +21,13 @@ export default function AllMachinesPage() {
   const [search, setSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
+  const [totalCount, setTotalCount] = useState(0)
 
-
-
-  const fetchLeases = async () => {
+  const fetchLeases = async (searchTerm = '', page = 1, pageSize = 12) => {
     if (loadingUser) return
-    if (!user){
+    if (!user) {
       router.push('/login')
+      return
     }
     setLoading(true)
     try {
@@ -39,10 +37,13 @@ export default function AllMachinesPage() {
           Authorization: `Bearer ${token}`,
         },
         params: {
-          page_size: 9999,
+          search: searchTerm,
+          page,
+          page_size: pageSize,
         },
       })
-      setLeases(res.data.results || res.data)
+      setLeases(res.data.results)
+      setTotalCount(res.data.count)
     } catch (err) {
       toast.error('Failed to fetch machines.')
     } finally {
@@ -55,26 +56,18 @@ export default function AllMachinesPage() {
       router.push('/login')
     }
     if (user) {
-      fetchLeases()
+      fetchLeases(search, currentPage, pageSize)
     }
-  }, [user, loadingUser])
-
-  const filteredLeases = leases.filter(lease =>
-    [lease.hostname, lease.mac_address, lease.dhcp_lease_ip_address, lease.client_name]
-      .filter(val => typeof val === 'string')
-      .some(value => value.toLowerCase().includes(search.toLowerCase()))
-  )
-
-  const totalPages = Math.max(1, Math.ceil(filteredLeases.length / pageSize))
-  const paginated = filteredLeases.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+  }, [user, loadingUser, search, currentPage, pageSize])
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text)
     toast.success('Copied to clipboard!')
   }
 
-  
-  if (loadingUser || !user) return 
+  if (loadingUser || !user) return null
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
 
   return (
     <div className="space-y-6">
@@ -89,8 +82,9 @@ export default function AllMachinesPage() {
           setCurrentPage(1)
         }}
       />
+      
       <p className="text-sm text-gray-600 dark:text-gray-400">
-        Showing {filteredLeases.length} results out of {leases.length} total machines.
+        Showing {leases.length} of {totalCount} machines (Page {currentPage} of {totalPages})
       </p>
 
       {loading ? (
@@ -109,38 +103,34 @@ export default function AllMachinesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {paginated.length > 0 ? (
-                paginated.map((lease, idx) => (
+              {leases.length > 0 ? (
+                leases.map((lease, idx) => (
                   <tr key={idx} className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#2b2b2b] transition">
                     <td className="px-4 py-2">{lease.hostname}</td>
-                    <td className="px-4 py-2 font-mono">{lease.mac_address}
-                    
-                        <Tooltip text="Copy MAC Address" position="top">
-                            <button
-                                onClick={() => copyToClipboard(lease.mac_address)}
-                                className="ml-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-                            >
-                                <Clipboard className="w-4 h-4 cursor-pointer" />
-                            </button>
-                        </Tooltip>
+                    <td className="px-4 py-2 font-mono">
+                      {lease.mac_address}
+                      <Tooltip text="Copy MAC Address" position="top">
+                        <button
+                          onClick={() => copyToClipboard(lease.mac_address)}
+                          className="ml-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                        >
+                          <Clipboard className="w-4 h-4 cursor-pointer" />
+                        </button>
+                      </Tooltip>
                     </td>
-                    
                     <td className="px-4 py-2">{lease.dhcp_lease_ip_address}</td>
                     <td className="px-4 py-2">{lease.client_name || 'Unknown'}</td>
                     <td className="px-4 py-2">
                       <Link href={`/routers/${lease.router_id}`} className="text-blue-500 hover:underline">
-                        {lease.router_serial?? 'Unknown'}
-                        
+                        {lease.router_serial ?? 'Unknown'}
                       </Link>
                     </td>
-                    {/* {console.log(lease)} */}
-                    
                     <td className="px-4 py-2 text-xs text-gray-500">{new Date(lease.added_at).toLocaleString()}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan="6" className="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
                     No machines found.
                   </td>
                 </tr>
