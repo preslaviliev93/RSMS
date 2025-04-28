@@ -15,7 +15,6 @@ export default function AllMachinesPage() {
   const { user, loadingUser } = useAuthGuard()
   const router = useRouter()
   const API_URL = process.env.NEXT_PUBLIC_API_URL
-
   const [leases, setLeases] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
