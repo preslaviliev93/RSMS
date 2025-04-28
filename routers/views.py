@@ -60,20 +60,29 @@ class RegisterRouterView(APIView):
     def post(self, request):
         if request.method.upper() != 'POST':
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
         try:
             data = request.data
             print(f"Requested method: {request.method}")
             print(f"Received data before converting to json format {data}")
-            if isinstance(data, dict) and len(data) == 1:
-                raw_data = list(data.keys())[0]
-                data = json.loads(data[raw_data])
+
+            if isinstance(data, dict):
+                if len(data) == 1 and isinstance(list(data.keys())[0], str) and list(data.values())[0] == ['']:
+                    # Old router detected
+                    raw_json_string = list(data.keys())[0]
+                    print(f"Detected OLD router sending JSON inside key. Raw JSON String: {raw_json_string}")
+                    data = json.loads(raw_json_string)
+                else:
+                    # New router sending proper JSON
+                    print(f"Detected NEW router sending normal JSON format.")
 
             router_serial = data.get('router_serial')
             router_identity = data.get('router_identity')
             interfaces = data.pop("tunnels", [])
 
             matched_client = match_client_by_router_identity(router_identity)
-            print(f"raw data {data}")
+            print(f"Raw data after loading: {data}")
+
             router, created = Routers.objects.update_or_create(
                 router_serial=router_serial,
                 defaults={
@@ -90,15 +99,14 @@ class RegisterRouterView(APIView):
                     "router_last_seen": timezone.now()
                 }
             )
-            # CHECK IF UPDATED OR CREATED AND TRY CATCH ERROR
 
             update_heartbeat(router)
             sync_interfaces(router, interfaces)
 
             return Response({"message": "Router data received and saved."}, status=status.HTTP_201_CREATED)
 
-        except json.JSONDecodeError:
-            print(f"Json Decode Error")
+        except json.JSONDecodeError as e:
+            print(f"Json Decode Error: {str(e)}")
             return Response({"error": "Invalid JSON format"}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:

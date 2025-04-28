@@ -6,7 +6,7 @@ from clients.models import Client
 class Routers(models.Model):
     router_serial = models.CharField(max_length=50, null=False, blank=False, default="")
     router_model = models.CharField(max_length=100, null=False, blank=False, default="")
-    router_version = models.CharField(max_length=20, null=False, blank=False, default="")
+    router_version = models.CharField(max_length=50, null=False, blank=False, default="")
     router_hardware = models.CharField(max_length=100, null=False, blank=False, default="")
     router_identity = models.CharField(max_length=100, null=False, blank=False, default="")
     router_uplink_ip = models.GenericIPAddressField(null=True, blank=True, default="0.0.0.0/0")
@@ -51,9 +51,9 @@ class RouterInterfaces(models.Model):
 class DHCPLeases(models.Model):
     router_id = models.ForeignKey(Routers, on_delete=models.CASCADE, related_name="dhcp_leases", null=True, blank=True)
     client_id = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="client_dhcp_leases", null=True, blank=True)
-    mac_address = models.CharField(max_length=20, null=False, blank=False, default="")
+    mac_address = models.CharField(max_length=50, null=False, blank=False, default="")
     dhcp_lease_ip_address = models.GenericIPAddressField(null=True, blank=True, default="0.0.0.0/0")
-    hostname = models.CharField(max_length=20, null=False, blank=False, default="")
+    hostname = models.CharField(max_length=50, null=False, blank=False, default="")
     added_at = models.DateTimeField(null=True, blank=True, default=timezone.now)
 
 
