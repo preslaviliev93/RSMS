@@ -12,9 +12,10 @@ import Tooltip from '../components/Tooltip'
 import Link from 'next/link'
 
 export default function AllMachinesPage() {
-  const { user, loadingUser } = useAuthGuard()
   const router = useRouter()
   const API_URL = process.env.NEXT_PUBLIC_API_URL
+  const { user, loadingUser } = useAuthGuard()
+
   const [leases, setLeases] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -22,6 +23,7 @@ export default function AllMachinesPage() {
   const [pageSize, setPageSize] = useState(12)
   const [totalCount, setTotalCount] = useState(0)
 
+  // Main fetching function
   const fetchLeases = async (searchTerm = '', page = 1, pageSize = 12) => {
     if (loadingUser) return
     if (!user) {
@@ -78,10 +80,10 @@ export default function AllMachinesPage() {
         value={search}
         onChange={(e) => {
           setSearch(e.target.value)
-          setCurrentPage(1)
+          setCurrentPage(1) // Reset page to 1 when searching
         }}
       />
-      
+
       <p className="text-sm text-gray-600 dark:text-gray-400">
         Showing {leases.length} of {totalCount} machines (Page {currentPage} of {totalPages})
       </p>

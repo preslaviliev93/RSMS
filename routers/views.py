@@ -180,12 +180,14 @@ class AllMachinesView(APIView):
 
     def get(self, request):
         search = request.query_params.get('search', None)
-        leases = DHCPLeases.objects.all().order_by('-added_at')
+        leases = DHCPLeases.objects.select_related('client_id', 'router_id').order_by('-added_at')
         if search:
             leases = leases.filter(
                 Q(hostname__icontains=search) |
                 Q(mac_address__icontains=search) |
-                Q(dhcp_lease_ip_address__icontains=search)
+                Q(dhcp_lease_ip_address__icontains=search) |
+                Q(client_id__client_name__icontains=search) |
+                Q(router_id__router_serial__icontains=search)
             )
         paginator = DHCPLeasesPagination()
         result_page = paginator.paginate_queryset(leases, request)
