@@ -62,8 +62,9 @@ class RegisterRouterView(APIView):
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
         try:
-            print(f"Requested method: {request.method}")
-            print(f"Received data before converting to json format {request.data}")
+            # LEFT FOR DEBUG PURPOSES #
+            # print(f"Requested method: {request.method}")
+            # print(f"Received data before converting to json format {request.data}")
 
             #Fixing issue when older Mikrotik ROS versions send <QUERYDICT instead of JSON
             if isinstance(request.data, dict) and len(request.data) ==1:
@@ -78,7 +79,7 @@ class RegisterRouterView(APIView):
             interfaces = data.pop("tunnels", [])
 
             matched_client = match_client_by_router_identity(router_identity)
-            print(f"Raw data after loading: {data}")
+            # print(f"Raw data after loading: {data}")
 
             router, created = Routers.objects.update_or_create(
                 router_serial=router_serial,
@@ -103,11 +104,11 @@ class RegisterRouterView(APIView):
             return Response({"message": "Router data received and saved."}, status=status.HTTP_201_CREATED)
 
         except json.JSONDecodeError as e:
-            print(f"Json Decode Error: {str(e)}")
+            # print(f"Json Decode Error: {str(e)}")
             return Response({"error": "Invalid JSON format"}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
-            print(f"Error: {str(e)}")
+            # print(f"Error: {str(e)}")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -118,10 +119,11 @@ class RegisterDHCPLeases(APIView):
         if request.method.upper() != 'POST':
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
         try:
-            data = request.data
-            if isinstance(data, dict) and len(data) == 1:
-                raw_data = list(data.keys())[0]
-                data = json.loads(data[raw_data])
+            if isinstance(request.data, dict) and len(request.data) == 1:
+                raw_data = list(request.data.keys())[0]
+                data = json.loads(raw_data)
+            else:
+                data = request.data
             # print(f"DHCP INFO {data}")
             router_serial = data.get('router_serial')
             router_id = get_router_id_by_router_serial(router_serial)
