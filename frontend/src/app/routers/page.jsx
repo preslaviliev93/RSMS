@@ -6,9 +6,7 @@ import FilterResultsSeaching from '../components/FilterResultsSeaching'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import PaginationControls from '../components/PaginationControls'
-
 import axios from 'axios'
-import { Activity } from 'lucide-react'
 
 export default function Routers() {
   const { user, loadingUser } = useAuthGuard()
@@ -19,22 +17,24 @@ export default function Routers() {
   const router = useRouter()
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
-  const API_URL = process.env.NEXT_PUBLIC_API_URL
-  if (loadingUser || !user) {
-    return null;
-  }
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL
+
+  // ✅ Only run effect after auth is loaded
   useEffect(() => {
-    if (loadingUser) return;
-    if (!user) {
+    if (!loadingUser && !user) {
       router.replace('/login')
+      return
     }
-    fetchRouters(search)
+
+    if (user) {
+      fetchRouters(search)
+    }
   }, [user, loadingUser, search])
 
   const fetchRouters = async (searchTerm = '') => {
-    setLoading(true)
     try {
+      setLoading(true)
       const token = localStorage.getItem('accessToken')
       const response = await axios.get(`${API_URL}/routers/`, {
         headers: {
@@ -54,28 +54,28 @@ export default function Routers() {
     }
   }
 
+  // ✅ While auth is loading, don’t render anything
+  if (loadingUser) return null
+
+  // ✅ If not logged in (but auth is ready), stop render
+  if (!user) return null
+
   const filteredRouters = routers.filter(router =>
     Object.values(router)
       .filter(value => typeof value === 'string')
       .some(value => value.toLowerCase().includes(search.toLowerCase()))
   )
-  
+
   const totalPages = Math.max(1, Math.ceil(filteredRouters.length / pageSize))
   const startIndex = (currentPage - 1) * pageSize
   const paginatedRouters = filteredRouters.slice(startIndex, startIndex + pageSize)
-  
- 
-  if (loadingUser) {
-    return null
-  }
-  
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Routers</h1>
       </div>
-      
+
       <FilterResultsSeaching
         type="text"
         placeholder="Search routers..."
@@ -85,35 +85,36 @@ export default function Routers() {
           setCurrentPage(1)
         }}
       />
+
       {loading ? (
         <p className="text-center text-gray-500 dark:text-gray-400">Loading routers...</p>
       ) : (
         <>
-        <p className="text-sm text-gray-600 dark:text-gray-300">
-          Showing {filteredRouters.length} of {routers.length} routers
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {routers.length > 0 ? (
-            paginatedRouters.map((router) => (
-              <RouterCard key={router.id} router={router} />
-            ))
-          ) : (
-            <p className="text-gray-600 dark:text-gray-400">No routers found.</p>
-          )}
-        </div>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Showing {filteredRouters.length} of {routers.length} routers
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {routers.length > 0 ? (
+              paginatedRouters.map((router) => (
+                <RouterCard key={router.id} router={router} />
+              ))
+            ) : (
+              <p className="text-gray-600 dark:text-gray-400">No routers found.</p>
+            )}
+          </div>
         </>
       )}
 
       <PaginationControls
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-              pageSize={pageSize}
-              setPageSize={(value) => {
-                setPageSize(parseInt(value))
-                setCurrentPage(1)
-              }}
-            />
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        pageSize={pageSize}
+        setPageSize={(value) => {
+          setPageSize(parseInt(value))
+          setCurrentPage(1)
+        }}
+      />
     </div>
   )
 }

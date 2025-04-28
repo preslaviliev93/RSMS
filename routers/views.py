@@ -62,6 +62,8 @@ class RegisterRouterView(APIView):
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
         try:
             data = request.data
+            print(f"Requested method: {request.method}")
+            print(f"Received data before converting to json format {data}")
             if isinstance(data, dict) and len(data) == 1:
                 raw_data = list(data.keys())[0]
                 data = json.loads(data[raw_data])
@@ -71,7 +73,7 @@ class RegisterRouterView(APIView):
             interfaces = data.pop("tunnels", [])
 
             matched_client = match_client_by_router_identity(router_identity)
-
+            print(f"raw data {data}")
             router, created = Routers.objects.update_or_create(
                 router_serial=router_serial,
                 defaults={
@@ -88,6 +90,7 @@ class RegisterRouterView(APIView):
                     "router_last_seen": timezone.now()
                 }
             )
+            # CHECK IF UPDATED OR CREATED AND TRY CATCH ERROR
 
             update_heartbeat(router)
             sync_interfaces(router, interfaces)
@@ -95,6 +98,7 @@ class RegisterRouterView(APIView):
             return Response({"message": "Router data received and saved."}, status=status.HTTP_201_CREATED)
 
         except json.JSONDecodeError:
+            print(f"Json Decode Error")
             return Response({"error": "Invalid JSON format"}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
