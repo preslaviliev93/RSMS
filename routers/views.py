@@ -62,7 +62,7 @@ class RegisterRouterView(APIView):
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
         try:
-            data = request.data
+            data = request.data.copy()  # make it mutable
             print(f"Requested method: {request.method}")
             print(f"Received data before converting to json format {data}")
 
