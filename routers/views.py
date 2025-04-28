@@ -65,6 +65,7 @@ class RegisterRouterView(APIView):
             print(f"Requested method: {request.method}")
             print(f"Received data before converting to json format {request.data}")
 
+            #Fixing issue when older Mikrotik ROS versions send <QUERYDICT instead of JSON
             if isinstance(request.data, dict) and len(request.data) ==1:
                 raw_data = list(request.data.keys())[0]
                 data = json.loads(raw_data)
