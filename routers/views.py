@@ -62,19 +62,15 @@ class RegisterRouterView(APIView):
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
         try:
-            data = request.data.copy()  # make it mutable
             print(f"Requested method: {request.method}")
-            print(f"Received data before converting to json format {data}")
+            print(f"Received data before converting to json format {request.data}")
 
-            if isinstance(data, dict):
-                if len(data) == 1 and isinstance(list(data.keys())[0], str) and list(data.values())[0] == ['']:
-                    # Old router detected
-                    raw_json_string = list(data.keys())[0]
-                    print(f"Detected OLD router sending JSON inside key. Raw JSON String: {raw_json_string}")
-                    data = json.loads(raw_json_string)
-                else:
-                    # New router sending proper JSON
-                    print(f"Detected NEW router sending normal JSON format.")
+            if isinstance(request.data, dict) and len(request.data) ==1:
+                raw_data = list(request.data.keys())[0]
+                data = json.loads(raw_data)
+            else:
+                data = request.data
+
 
             router_serial = data.get('router_serial')
             router_identity = data.get('router_identity')
