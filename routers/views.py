@@ -11,6 +11,7 @@ from .models import Routers,  DHCPLeases
 from django.db.models import Q
 from routers.utils import (match_client_by_router_identity, update_heartbeat, sync_interfaces,
                            get_router_id_by_router_serial, get_router_client_by_serial)
+from locations_manager.models import Location
 
 
 class RouterView(APIView):
@@ -35,7 +36,8 @@ class RouterView(APIView):
                 Q(router_uptime__icontains=search) |
                 Q(router_location_country__icontains=search) |
                 Q(router_last_seen__icontains=search) |
-                Q(router_added__icontains=search)
+                Q(router_added__icontains=search) |
+                Q(location__name__icontains=search)
             )
         client_id = request.query_params.get('client_id')
         if client_id:
@@ -66,7 +68,8 @@ class RegisterRouterView(APIView):
             # print(f"Requested method: {request.method}")
             # print(f"Received data before converting to json format {request.data}")
 
-            #Fixing issue when older Mikrotik ROS versions send <QUERYDICT instead of JSON
+            # Fixing issue when older Mikrotik ROS versions send "<QUERYDICT...>" instead of JSON
+
             if isinstance(request.data, dict) and len(request.data) ==1:
                 raw_data = list(request.data.keys())[0]
                 data = json.loads(raw_data)
@@ -153,7 +156,6 @@ class RegisterDHCPLeases(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
 class ClientDHCPLeasesView(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -168,11 +170,6 @@ class ClientDHCPLeasesView(APIView):
         result_page = paginator.paginate_queryset(leases, request)
         serializer = DHCPLeasesSerializer(result_page, many=True)
         return paginator.get_paginated_response(serializer.data)
-
-
-
-
-
 
 
 class AllMachinesView(APIView):

@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'channels',
     'stats',
+    'locations_manager.apps.LocationsManagerConfig',
     'logging_services',
     'django.contrib.admin',
     'django.contrib.auth',

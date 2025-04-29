@@ -18,7 +18,8 @@ import {
   Code,
   MapPin,
   Eye,
-  Calendar1
+  Calendar1,
+  IdCard 
 } from 'lucide-react'
 import { formatDateForUI } from '@/app/utils/formatDate'
 
@@ -78,6 +79,7 @@ export default function RouterDetailsPage() {
       {console.log(`Router Info:`, routerInfo)}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-300">
         <InfoRow icon={<Cpu className="w-4 h-4" />} label="Hardware" value={routerInfo.router_hardware} />
+        <InfoRow icon={<IdCard  className="w-4 h-4" />} label="Identity" value={routerInfo.router_identity} />
         <InfoRow icon={<ShieldCheck className="w-4 h-4" />} label="Model" value={routerInfo.router_model} />
         <InfoRow icon={<Globe className="w-4 h-4" />} label="Public IP" value={routerInfo.router_public_ip} />
         <InfoRow icon={<Network className="w-4 h-4" />} label="Uplink IP" value={routerInfo.router_uplink_ip} />

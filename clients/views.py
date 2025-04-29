@@ -7,6 +7,8 @@ from clients.serializers import ClientSerializer, ClientsLogsSerializer
 from .permissions import IsAdminOrReadOnly
 from .paginations import ClientPagination, ClientsLogsPagination
 from django.db.models import Q
+from locations_manager.models import Location
+from locations_manager.serializers import LocationListSerializer
 
 
 class ClientCreateAPIView(APIView):
@@ -25,7 +27,8 @@ class ClientCreateAPIView(APIView):
                 Q(client_data_center__icontains=search) |
                 Q(client_hostname__icontains=search) |
                 Q(client_router_prefix__icontains=search) |
-                Q(client_address__icontains=search)
+                Q(client_address__icontains=search) |
+                Q(client_data_center__icontains=search)
             )
         paginator = ClientPagination()
         result_page = paginator.paginate_queryset(clients, request)
@@ -123,4 +126,20 @@ class ClientLogView(APIView):
         result_page = paginator.paginate_queryset(logs, request)
         serializer = ClientsLogsSerializer(result_page, many=True)
         return Response(serializer.data)
+
+
+
+class ClientLocationsView(APIView):
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request, pk):
+
+        try:
+            client = Client.objects.get(pk=pk)
+        except Client.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        locations = Location.objects.filter(client=client)
+        serializer = LocationListSerializer(locations, many=True)
+        return Response(serializer.data)
+
 

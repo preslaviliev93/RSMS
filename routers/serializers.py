@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Routers, RouterInterfaces, DHCPLeases
 from clients.serializers import ClientMiniSerializer
+from locations_manager.models import Location
 import re
 
 
@@ -33,11 +34,11 @@ class RoutersSerializer(serializers.ModelSerializer):
     interfaces = RouterInterfacesSerializer(many=True, read_only=True)
     dhcp_leases = DHCPLeasesSerializer(many=True, read_only=True)
     router_client = ClientMiniSerializer(read_only=True)
-
+    location_name = serializers.SerializerMethodField()
     class Meta:
         model = Routers
         fields = '__all__'
-
+        extra_fields = ['location_name']
     def validate_router_serial(self, value):
         if 0 <= len(value) >= 50:
             raise serializers.ValidationError('Router Serial Number must be between 1-50 characters long')
@@ -57,4 +58,7 @@ class RoutersSerializer(serializers.ModelSerializer):
 
         return super().create(validated_data)
 
+    def get_location_name(self, obj):
+        location = Location.objects.filter(router_vpn_ip=obj).first()
+        return location.name if location else None
 

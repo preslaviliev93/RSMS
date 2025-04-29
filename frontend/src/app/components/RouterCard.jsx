@@ -11,11 +11,16 @@ import {
   Code,
   Eye,
   Map,
+  MapPinCheck,
+  IdCard,
   
 } from 'lucide-react';
 import Link from 'next/link';
 import Tooltip from '../components/Tooltip';
 import {formatDateForUI} from '../utils/formatDate';
+
+
+
 
 export default function RouterCard({ router }) {
 
@@ -66,6 +71,8 @@ export default function RouterCard({ router }) {
               </div>
             </Tooltip>
 
+           
+
             <Tooltip text="Last seen">
               
               <div className="flex items-center gap-3 p-3 rounded-md bg-gray-50 dark:bg-[#262626] hover:bg-gray-100 dark:hover:bg-[#2f2f2f] transition cursor-default">
@@ -110,6 +117,17 @@ export default function RouterCard({ router }) {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{router.router_hc_client || 'Unknown'}</p>
+                </div>
+              </div>
+            </Tooltip>
+
+            <Tooltip text="Location Name ">
+              <div className="flex items-center gap-3 p-3 rounded-md bg-gray-50 dark:bg-[#262626] hover:bg-gray-100 dark:hover:bg-[#2f2f2f] transition cursor-default">
+                <div className="p-2 rounded-full bg-gray-200 dark:bg-green-700">
+                  <MapPinCheck  className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{router.location_name  || "Unknown Location"}</p>
                 </div>
               </div>
             </Tooltip>
@@ -165,6 +183,8 @@ export default function RouterCard({ router }) {
                 </div>
               </div>
             </Tooltip>
+
+            
           </div>
         </div>
 

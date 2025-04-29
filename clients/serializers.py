@@ -2,12 +2,14 @@ from rest_framework import serializers
 from users.models import User
 from clients.models import Client, ClientsLogs
 from routers.models import Routers, DHCPLeases
+from locations_manager.models import Location
 
 
 class ClientSerializer(serializers.ModelSerializer):
     # Routers count get
     routers_count = serializers.SerializerMethodField()
     dhcp_leases_count = serializers.SerializerMethodField()
+    locations_count = serializers.SerializerMethodField()
     # machines count get
     class Meta:
         model = Client
@@ -18,6 +20,9 @@ class ClientSerializer(serializers.ModelSerializer):
 
     def get_dhcp_leases_count(self, obj):
         return DHCPLeases.objects.filter(client_id=obj).count()
+
+    def get_locations_count(self, obj):
+        return Location.objects.filter(client=obj).count()
 
     def validate_client_name(self, value):
         if Client.objects.exclude(pk=self.instance.pk if self.instance else None).filter(

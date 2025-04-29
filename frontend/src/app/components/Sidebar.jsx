@@ -14,7 +14,7 @@ import CollapseToggleButton from '../components/CollapseToggleButton';
 import {
   Home, Server, Router, FileText,
   CircleUserRound, UserPen, ChartArea,
-  KeyRound, LogOut, Monitor
+  KeyRound, LogOut, Monitor, MapPinCheck,
 } from 'lucide-react'
 
 export default function Sidebar() {
@@ -102,6 +102,7 @@ export default function Sidebar() {
           {!collapsed && <SidebarSectionTitle>Network</SidebarSectionTitle>}
           <CustomIconLink href="/routers" icon={<Router />} text="Routers" collapsed={collapsed} />
           <CustomIconLink href="/servers" icon={<Server />} text="Servers" collapsed={collapsed} />
+          <CustomIconLink href="/locations" icon={<MapPinCheck />} text="Locations" collapsed={collapsed} />
           <CustomIconLink href="/machines" icon={<Monitor />} text="Machines" collapsed={collapsed} />
           {role === "admin" && <CustomIconLink href="/logs" icon={<FileText />} text="Logs" collapsed={collapsed} />}
 

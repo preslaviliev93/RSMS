@@ -11,18 +11,52 @@ import { showDeleteConfirmToast } from '../components/DeleteConfirmationToast'
 import AddClientModal from '../components/AddClientModal'
 import { useRouter } from 'next/navigation'
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL
+
 export default function ClientsPage() {
   const { user, loadingUser } = useAuthGuard()
   const [clients, setClients] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [search, setSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
-  const [search, setSearch] = useState('')
   const [role, setRole] = useState('')
   const router = useRouter()
-  const API_URL = process.env.NEXT_PUBLIC_API_URL
-  
+
+  const fetchClients = async () => {
+    setLoading(true)
+    try {
+      const token = localStorage.getItem('accessToken')
+      const response = await axios.get(`${API_URL}/clients/all-clients/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          page_size: 9999, // ✅ Fetch ALL clients once
+        },
+      })
+      setClients(response.data.results)
+    } catch (err) {
+      if (err.response?.status === 401) {
+        router.push('/login')
+      }
+      setError(err.response?.data?.message || 'Failed to fetch clients.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (loadingUser) return
+    if (!user) {
+      router.push('/login')
+      return
+    }
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}')
+    setRole(userData.role || '')
+    fetchClients()
+  }, [user, API_URL])
 
   const handleDelete = (client) => {
     showDeleteConfirmToast({
@@ -47,49 +81,13 @@ export default function ClientsPage() {
       }
     })
   }
-  
 
-  const fetchClients = async () => {
-    setLoading(true)
-    try {
-      const token = localStorage.getItem('accessToken')
-      const response = await axios.get(`${API_URL}/clients/all-clients/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        params: {
-          page_size: 9999,
-        },
-      })
-  
-      setClients(response.data.results)
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch clients.')
-    } finally {
-      setLoading(false)
-    }
-  }
-  
-  useEffect(() => {
-    if(loadingUser) return
-    if (!user) {
-      router.push('/login')
-      return
-    }
-    const userRole = JSON.parse(localStorage.getItem('userData') || '{}').role || ''
-    setRole(userRole)
-    console.log(`User role: ${userRole}`)
-    fetchClients()
-  }, [user, API_URL])
-
- 
+  // ✅ Search inside ALL string fields automatically
   const filteredClients = clients.filter(client =>
     Object.values(client)
-      .filter(value => typeof value === 'string')
+      .filter(value => typeof value === 'string') // only check string fields
       .some(value => value.toLowerCase().includes(search.toLowerCase()))
   )
-  
-  
 
   const totalPages = Math.max(1, Math.ceil(filteredClients.length / pageSize))
   const startIndex = (currentPage - 1) * pageSize
@@ -104,52 +102,56 @@ export default function ClientsPage() {
   }
 
   if (error) {
-    return <p className="text-red-500">{error}</p>
+    return <p className="text-red-500 text-center">{error}</p>
   }
 
   return (
-    <div className="flex flex-col min-h-full gap-4">
+    <div className="flex flex-col min-h-full gap-4 p-6">
+      {/* Search and Add Client button */}
       <div className="flex items-center justify-between gap-4 w-full">
-  <div className="w-full">
-    <FilterResultsSeaching
-      type="text"
-      placeholder="Search clients..."
-      value={search}
-      onChange={(e) => {
-        setSearch(e.target.value)
-        setCurrentPage(1)
-      }}
-    />
-  </div>
+        <div className="w-full">
+          <FilterResultsSeaching
+            type="text"
+            placeholder="Search clients..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setCurrentPage(1) // ✅ Reset page on search
+            }}
+          />
+        </div>
 
-  <div className="shrink-0">
-    <AddClientModal onSuccess={fetchClients} />
-  </div>
-</div>
+        <div className="shrink-0">
+          <AddClientModal onSuccess={fetchClients} />
+        </div>
+      </div>
 
+      {/* Clients Count */}
       <p className="text-sm text-gray-600 dark:text-gray-300">
-        Showing {paginatedClients.length} / {clients.length} 
+        Showing {paginatedClients.length} / {clients.length} clients
       </p>
-      
-      
-      
 
-
+      {/* Clients Cards */}
       <div className="flex-grow">
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {paginatedClients.length > 0 ? (
             paginatedClients.map((client) => (
-              <ClientCard key={client.id} client={client} isAdmin={role} onDelete={() => handleDelete(client)}/>
+              <ClientCard
+                key={client.id}
+                client={client}
+                isAdmin={role}
+                onDelete={() => handleDelete(client)}
+              />
             ))
           ) : (
-            <p className="text-gray-500 dark:text-gray-400 col-span-full">
+            <p className="text-center text-gray-500 dark:text-gray-400 col-span-full">
               No clients match your search.
             </p>
           )}
         </div>
       </div>
-     
 
+      {/* Pagination */}
       <PaginationControls
         currentPage={currentPage}
         totalPages={totalPages}
