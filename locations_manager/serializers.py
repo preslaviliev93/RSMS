@@ -11,9 +11,13 @@ class DHCPLeaseSerializer(serializers.ModelSerializer):
 class LocationListSerializer(serializers.ModelSerializer):
     client_name = serializers.CharField(source='client.client_name')
     router_serial = serializers.CharField(source='router_vpn_ip.router_serial')
+    leases_count = serializers.SerializerMethodField()
     class Meta:
         model = Location
-        fields = ['id', 'name', 'client_name', 'router_serial']
+        fields = ['id', 'name', 'client_name', 'router_serial', 'leases_count']
+
+    def get_leases_count(self, obj):
+        return DHCPLeases.objects.filter(router_id=obj.router_vpn_ip).count()
 
 class LocationDetailSerializer(serializers.ModelSerializer):
     location_name = serializers.CharField(source="name")

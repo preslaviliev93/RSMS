@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import toast from 'react-hot-toast'
-import { Edit, Trash2, MapPin, Server, Users } from 'lucide-react'
+import { Edit, Trash2, MapPin, Server, Users, IdCard, Hash } from 'lucide-react'
 import PaginationControls from '@/app/components/PaginationControls'
 import { useAuthGuard } from '@/app/hooks/useAuthGuard'
 import { showDeleteConfirmToast } from '@/app/components/DeleteConfirmationToast'
@@ -118,12 +118,20 @@ export default function LocationsPage() {
                   {location.name}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                  <IdCard  className="w-5 h-5" />
+                  <span className="font-medium text-gray-700 dark:text-gray-300">ID: {location.id}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                   <Users className="w-4 h-4" /> Client:
                   <span className="font-medium text-gray-700 dark:text-gray-300">{location.client_name}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                   <Server className="w-4 h-4" /> Router:
                   <span className="font-medium text-gray-700 dark:text-gray-300">{location.router_serial}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                  <Hash className="w-4 h-4" /> Leases counter:
+                  <span className="font-medium text-gray-700 dark:text-gray-300">{location.leases_count || 0 }</span>
                 </div>
               </div>
               {user?.role === 'admin' && (
