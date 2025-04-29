@@ -10,6 +10,7 @@ import { showDeleteConfirmToast } from '@/app/components/DeleteConfirmationToast
 import { useRouter } from 'next/navigation'
 import Modal from '@/app/components/Modal'
 import FilterResultsSeaching from '../components/FilterResultsSeaching'
+import { secureFetch } from '../utils/secureFetch'
 
 export default function LocationsPage() {
   const [locations, setLocations] = useState([])
@@ -26,18 +27,18 @@ export default function LocationsPage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL
 
   const fetchLocations = async () => {
+    setLoading(true)
     try {
-      const token = localStorage.getItem('accessToken')
-      const res = await axios.get(`${API_URL}/locations/`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await secureFetch({
+        url: `${API_URL}/locations/`,
         params: {
           search,
           page: currentPage,
           page_size: pageSize,
         },
       })
-      setLocations(res.data.results)
-      setTotalCount(res.data.count)
+      setLocations(res.results || [])
+      setTotalCount(res.count || 0)
     } catch (err) {
       toast.error('Failed to fetch locations.')
     } finally {

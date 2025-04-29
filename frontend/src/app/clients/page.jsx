@@ -2,46 +2,43 @@
 
 import { useEffect, useState } from 'react'
 import { useAuthGuard } from '../hooks/useAuthGuard'
-import axios from 'axios'
 import ClientCard from '../components/ClientCard'
 import PaginationControls from '../components/PaginationControls'
 import FilterResultsSeaching from '../components/FilterResultsSeaching'
-import toast from 'react-hot-toast'
 import { showDeleteConfirmToast } from '../components/DeleteConfirmationToast'
 import AddClientModal from '../components/AddClientModal'
+import Modal from '../components/Modal'
 import { useRouter } from 'next/navigation'
+import { secureFetch } from '../utils/secureFetch'
+import toast from 'react-hot-toast'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 export default function ClientsPage() {
   const { user, loadingUser } = useAuthGuard()
+  const router = useRouter()
+
   const [clients, setClients] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
-  const [role, setRole] = useState('')
-  const router = useRouter()
+
+  const [editingClient, setEditingClient] = useState(null)
+  const [editFormData, setEditFormData] = useState({})
 
   const fetchClients = async () => {
     setLoading(true)
     try {
-      const token = localStorage.getItem('accessToken')
-      const response = await axios.get(`${API_URL}/clients/all-clients/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        params: {
-          page_size: 9999, // ✅ Fetch ALL clients once
-        },
+      const res = await secureFetch({
+        url: `${API_URL}/clients/all-clients/`,
+        params: { page_size: 9999 },
       })
-      setClients(response.data.results)
+      setClients(res.results || res)
     } catch (err) {
-      if (err.response?.status === 401) {
-        router.push('/login')
-      }
-      setError(err.response?.data?.message || 'Failed to fetch clients.')
+      console.error('Failed to fetch clients:', err)
+      setError('Failed to fetch clients.')
     } finally {
       setLoading(false)
     }
@@ -53,39 +50,56 @@ export default function ClientsPage() {
       router.push('/login')
       return
     }
-    const userData = JSON.parse(localStorage.getItem('userData') || '{}')
-    setRole(userData.role || '')
     fetchClients()
-  }, [user, API_URL])
+  }, [user])
 
-  const handleDelete = (client) => {
+  const handleDeleteClient = (clientId) => {
     showDeleteConfirmToast({
-      itemName: client.client_name,
+      itemName: clients.find(c => c.id === clientId)?.client_name || 'Client',
       onConfirm: async () => {
-        const token = localStorage.getItem('accessToken')
-        await toast.promise(
-          axios.delete(`${API_URL}/clients/all-clients/${client.id}/`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }),
-          {
-            loading: 'Deleting...',
-            success: () => {
-              setClients(prev => prev.filter(c => c.id !== client.id))
-              return 'Client deleted!'
-            },
-            error: 'Failed to delete client.',
-          }
-        )
+        try {
+          await secureFetch({
+            url: `${API_URL}/clients/all-clients/${clientId}/`,
+            method: 'DELETE',
+          })
+          toast.success('Client deleted!')
+          setClients(prev => prev.filter(c => c.id !== clientId))
+        } catch (error) {
+          toast.error('Failed to delete client.')
+        }
       }
     })
   }
 
-  // ✅ Search inside ALL string fields automatically
+  const openEditModal = (client) => {
+    setEditingClient(client)
+    setEditFormData(client)
+  }
+
+  const closeEditModal = () => {
+    setEditingClient(null)
+    setEditFormData({})
+  }
+
+  const handleEditSave = async () => {
+    try {
+      await secureFetch({
+        url: `${API_URL}/clients/all-clients/${editingClient.id}/`,
+        method: 'PUT',
+        data: editFormData,
+      })
+      toast.success('Client updated!')
+      fetchClients()
+      closeEditModal()
+    } catch (error) {
+      toast.error('Failed to update client.')
+      console.error(error)
+    }
+  }
+
   const filteredClients = clients.filter(client =>
     Object.values(client)
-      .filter(value => typeof value === 'string') // only check string fields
+      .filter(value => typeof value === 'string')
       .some(value => value.toLowerCase().includes(search.toLowerCase()))
   )
 
@@ -116,7 +130,7 @@ export default function ClientsPage() {
             value={search}
             onChange={(e) => {
               setSearch(e.target.value)
-              setCurrentPage(1) // ✅ Reset page on search
+              setCurrentPage(1)
             }}
           />
         </div>
@@ -139,8 +153,9 @@ export default function ClientsPage() {
               <ClientCard
                 key={client.id}
                 client={client}
-                isAdmin={role}
-                onDelete={() => handleDelete(client)}
+                isAdmin={user?.role}
+                onEdit={() => openEditModal(client)}
+                onDelete={() => handleDeleteClient(client.id)}
               />
             ))
           ) : (
@@ -162,6 +177,62 @@ export default function ClientsPage() {
           setCurrentPage(1)
         }}
       />
+
+      {/* Edit Modal */}
+      {editingClient && (
+        <Modal isOpen={!!editingClient} onClose={closeEditModal}>
+          <h2 className="text-xl font-bold mb-4">Edit Client: {editingClient.client_name}</h2>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleEditSave()
+            }}
+            className="space-y-4"
+          >
+            {[
+              'client_name',
+              'client_description',
+              'client_country',
+              'client_city',
+              'client_hostname',
+              'client_router_prefix',
+              'client_address',
+              'client_data_center',
+            ].map((field) => (
+              <div key={field}>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">
+                  {field.replace('client_', '').replace('_', ' ')}
+                </label>
+                <input
+                  type="text"
+                  name={field}
+                  value={editFormData[field] || ''}
+                  onChange={(e) =>
+                    setEditFormData(prev => ({ ...prev, [field]: e.target.value }))
+                  }
+                  className="w-full px-4 py-2 border rounded-md dark:bg-[#121212] dark:border-gray-700 dark:text-white"
+                />
+              </div>
+            ))}
+
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeEditModal}
+                className="px-4 py-2 bg-gray-400 dark:bg-gray-700 text-white rounded-md hover:bg-gray-500"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   )
 }

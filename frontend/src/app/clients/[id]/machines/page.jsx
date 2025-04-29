@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import axios from 'axios'
 import { useAuthGuard } from '../../../hooks/useAuthGuard'
 import toast from 'react-hot-toast'
 import PaginationControls from '@/app/components/PaginationControls'
-import { saveAs } from 'file-saver'
+import ExportCSVButton from '@/app/components/ExportCSVButton'
+import { secureFetch } from '@/app/utils/secureFetch'
 
 export default function ClientMachinesPage() {
   const { id: clientId } = useParams()
@@ -24,13 +24,12 @@ export default function ClientMachinesPage() {
 
   const fetchClientName = async () => {
     try {
-      const token = localStorage.getItem('accessToken')
-      const res = await axios.get(`${API_URL}/clients/all-clients/${clientId}/`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await secureFetch({
+        url: `${API_URL}/clients/all-clients/${clientId}/`,
       })
-      setClientName(res.data.client_name)
-    } catch (err) {
-      console.error('Failed to fetch client name')
+      setClientName(res.client_name)
+    } catch (error) {
+      console.error('Failed to fetch client name:', error)
     }
   }
 
@@ -38,23 +37,49 @@ export default function ClientMachinesPage() {
     if (!clientId) return
     setLoading(true)
     try {
-      const token = localStorage.getItem('accessToken')
-      const res = await axios.get(`${API_URL}/routers/client-leases/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const res = await secureFetch({
+        url: `${API_URL}/routers/client-leases/`,
         params: {
           client_id: clientId,
           page,
           page_size: pageSize,
         },
       })
-      setLeases(res.data.results || res.data)
-      setTotalCount(res.data.count)
-    } catch (err) {
-      toast.error('Failed to fetch DHCP leases')
+      setLeases(res.results || res)
+      setTotalCount(res.count || 0)
+    } catch (error) {
+      console.error('Failed to fetch DHCP leases:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchAllLeases = async () => {
+    setExporting(true)
+    try {
+      const res = await secureFetch({
+        url: `${API_URL}/routers/client-leases/`,
+        params: {
+          client_id: clientId,
+          page: 1,
+          page_size: 1000000,
+        },
+      })
+
+      const allLeases = res.results || res
+
+      return allLeases.map(lease => ({
+        Hostname: lease.hostname,
+        'MAC Address': lease.mac_address,
+        'IP Address': lease.internal_ip || lease.dhcp_lease_ip_address,
+        'Router Serial': lease.router_serial,
+        'Added At': new Date(lease.added_at).toLocaleString(),
+      }))
+    } catch (error) {
+      console.error('Failed to fetch all DHCP leases:', error)
+      return []
+    } finally {
+      setExporting(false)
     }
   }
 
@@ -72,62 +97,19 @@ export default function ClientMachinesPage() {
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
 
-  const exportToCSV = async () => {
-    setExporting(true)
-    try {
-      const token = localStorage.getItem('accessToken')
-      const res = await axios.get(`${API_URL}/routers/client-leases/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        params: {
-          client_id: clientId,
-          page_size: 10000,
-        },
-      })
-  
-      const allLeases = res.data.results || res.data
-  
-      const csvRows = [
-        ['Hostname', 'MAC Address', 'IP Address', 'Router Serial', 'Added At'],
-        ...allLeases.map(lease => [
-          lease.hostname,
-          lease.mac_address,
-          lease.internal_ip || lease.dhcp_lease_ip_address,
-          lease.router_serial,
-          new Date(lease.added_at).toLocaleString()
-        ])
-      ]
-  
-      const csvContent = csvRows.map(row => row.map(String).map(value => `"${value}"`).join(',')).join('\n')
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-      
-      const today = new Date().toISOString().split('T')[0]
-      const fileName = `machines-${clientName || clientId}-${today}.csv`
-      
-      saveAs(blob, fileName)
-      toast.success('Export successful!')
-    } catch (error) {
-      toast.error('Failed to export all machines.')
-    } finally {
-      setExporting(false)
-    }
-  }
-  
-  
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Machines for Client: {clientName || 'Loading...'}
         </h1>
-        <button
-          onClick={exportToCSV}
-          className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow cursor-pointer"
-        >
-          {exporting ? 'Exporting...' : 'Export to CSV'}
-        </button>
+        <ExportCSVButton
+          fetchData={fetchAllLeases}
+          headers={['Hostname', 'MAC Address', 'IP Address', 'Router Serial', 'Added At']}
+          fileName={`machines-${clientName || clientId}-${new Date().toISOString().split('T')[0]}.csv`}
+          buttonText="Export Machines to CSV"
+          className="cursor-pointer hover:bg-blue-700"
+        />
       </div>
 
       <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -150,7 +132,10 @@ export default function ClientMachinesPage() {
             </thead>
             <tbody className="bg-white dark:bg-[#1c1c1c] text-gray-800 dark:text-gray-100">
               {leases.map((lease, index) => (
-                <tr key={index} className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition">
+                <tr
+                  key={index}
+                  className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition"
+                >
                   <td className="px-6 py-3">{lease.hostname}</td>
                   <td className="px-6 py-3 font-mono">{lease.mac_address}</td>
                   <td className="px-6 py-3">{lease.internal_ip || lease.dhcp_lease_ip_address}</td>

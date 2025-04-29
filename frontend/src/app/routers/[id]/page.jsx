@@ -22,6 +22,8 @@ import {
   IdCard 
 } from 'lucide-react'
 import { formatDateForUI } from '@/app/utils/formatDate'
+import { secureFetch } from '@/app/utils/secureFetch'
+import toast from 'react-hot-toast'
 
 export default function RouterDetailsPage() {
   const { user, loadingUser } = useAuthGuard()
@@ -35,15 +37,12 @@ export default function RouterDetailsPage() {
   const fetchRouterDetails = async () => {
     setLoading(true)
     try {
-      const token = localStorage.getItem('accessToken')
-      const response = await axios.get(`${API_URL}/routers/${id}/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const response = await secureFetch({
+        url: `${API_URL}/routers/${id}/`,
       })
-      setRouterData(response.data)
+      setRouterData(response)
     } catch (err) {
-      console.error(err)
+      toast.error('Failed to load router details.')
       setError('Failed to load router details.')
     } finally {
       setLoading(false)

@@ -5,6 +5,9 @@ import axios from 'axios'
 import ToastMessage from '../components/ToastMessage'
 import { useAuthGuard } from '../hooks/useAuthGuard'
 import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
+import { secureFetch } from '../utils/secureFetch'
+
 
 export default function ProfilePage() {
   const { user, loadingUser } = useAuthGuard()
@@ -17,22 +20,24 @@ export default function ProfilePage() {
   const router = useRouter()
   const API_URL = process.env.NEXT_PUBLIC_API_URL
 
+
   useEffect(() => {
     if (!user && !loadingUser) {
         router.push('/login')
     }else{
-        const fetchProfile = async () => {
-            try {
-              const token = localStorage.getItem('accessToken')
-              const res = await axios.get(`${API_URL}/users/profile/`, {
-                headers: { Authorization: `Bearer ${token}` },
-              })
-              setProfile(res.data)
-              setFormData(res.data)
-            } catch (err) {
-              setToast({ type: 'error', message: 'Failed to fetch profile' })
-            }
-          }
+      const fetchProfile = async () => {
+        try {
+          const res = await secureFetch({
+            url: `${API_URL}/users/profile/`,
+          })
+          setProfile(res)
+          setFormData(res)
+        } catch (error) {
+          console.error('Failed to fetch profile:', error)
+          setToast({ type: 'error', message: 'Failed to fetch profile' })
+        }
+      }
+      
           fetchProfile()
     }
   }, [])

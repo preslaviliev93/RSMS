@@ -7,7 +7,8 @@ import PaginationControls from '../components/PaginationControls'
 import FilterResultsSeaching from '../components/FilterResultsSeaching'
 import { useRouter } from 'next/navigation'
 import ToastMessage from '../components/ToastMessage'
-
+import toast from 'react-hot-toast'
+import { secureFetch } from '../utils/secureFetch'
 const LOG_TYPES = ['All', 'Login', 'Logout', 'add', 'edit', 'delete']
 
 export default function Logs() {
@@ -21,9 +22,8 @@ export default function Logs() {
   const [showToast, setShowToast] = useState(false)
   const [selectedLogType, setSelectedLogType] = useState('All')
   const router = useRouter()
-
   const API_URL = process.env.NEXT_PUBLIC_API_URL
-
+  
   useEffect(() => {
     if (!user || loadingUser) return
 
@@ -37,17 +37,27 @@ export default function Logs() {
     const fetchLogs = async () => {
       setLoading(true)
       try {
-        const token = localStorage.getItem('accessToken')
-        const res = await axios.get(`${API_URL}/logs/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        setLogs(res.data)
+        const res = await secureFetch({ url: `${API_URL}/logs/` })
+    
+        if (Array.isArray(res)) {
+          setLogs(res)
+        } else if (res.results) {
+          setLogs(res.results)
+        } else {
+          setLogs([])
+          toast.error('Unexpected response from logs API.')
+        }
+    
       } catch (err) {
-        setError('Failed to fetch logs')
+        console.error('Fetch logs error:', err)
+        toast.error('Failed to fetch logs.')
+        setError('Failed to fetch logs.')
       } finally {
         setLoading(false)
       }
     }
+    
+    
 
     fetchLogs()
   }, [user, loadingUser])

@@ -10,6 +10,8 @@ import FilterResultsSeaching from '../components/FilterResultsSeaching'
 import { Clipboard } from 'lucide-react'
 import Tooltip from '../components/Tooltip'
 import Link from 'next/link'
+import { secureFetch } from '../utils/secureFetch'
+
 
 export default function AllMachinesPage() {
   const router = useRouter()
@@ -23,34 +25,44 @@ export default function AllMachinesPage() {
   const [pageSize, setPageSize] = useState(12)
   const [totalCount, setTotalCount] = useState(0)
 
-  // Main fetching function
   const fetchLeases = async (searchTerm = '', page = 1, pageSize = 12) => {
     if (loadingUser) return
     if (!user) {
       router.push('/login')
       return
     }
+  
     setLoading(true)
     try {
-      const token = localStorage.getItem('accessToken')
-      const res = await axios.get(`${API_URL}/routers/all-leases/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const res = await secureFetch({
+        url: `${API_URL}/routers/all-leases/`,
         params: {
           search: searchTerm,
           page,
           page_size: pageSize,
         },
       })
-      setLeases(res.data.results)
-      setTotalCount(res.data.count)
-    } catch (err) {
+  
+      if (res.results) {
+        setLeases(res.results)
+        setTotalCount(res.count || 0)
+      } else if (Array.isArray(res)) {
+        setLeases(res)
+        setTotalCount(res.length)
+      } else {
+        setLeases([])
+        setTotalCount(0)
+        toast.error('Unexpected response while fetching machines.')
+      }
+  
+    } catch (error) {
+      console.error('Failed to fetch machines:', error)
       toast.error('Failed to fetch machines.')
     } finally {
       setLoading(false)
     }
   }
+  
 
   useEffect(() => {
     if (!user && !loadingUser) {

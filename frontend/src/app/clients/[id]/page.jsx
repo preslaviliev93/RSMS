@@ -14,6 +14,8 @@ import {
   Clock
 } from 'lucide-react'
 import { formatDateForUI } from '../../utils/formatDate'
+import toast from 'react-hot-toast'
+import { secureFetch } from '@/app/utils/secureFetch'
 
 export default function ClientDetailsPage() {
   const { id } = useParams()
@@ -27,16 +29,15 @@ export default function ClientDetailsPage() {
     if (!user || !id) return
 
     const fetchClient = async () => {
+      setLoading(true)
       try {
-        const token = localStorage.getItem('accessToken')
-        const response = await axios.get(`${API_URL}/clients/all-clients/${id}/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          }
+        const response = await secureFetch({
+          url: `${API_URL}/clients/all-clients/${id}/`,
         })
-        setClient(response.data)
+        setClient(response)
       } catch (err) {
-        setError(err.response?.data?.message || 'Failed to fetch client.')
+        toast.error('Failed to fetch client.')
+        setError('Failed to fetch client.')
       } finally {
         setLoading(false)
       }

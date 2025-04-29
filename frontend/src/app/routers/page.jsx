@@ -1,44 +1,44 @@
 'use client'
+
 import React, { useEffect, useState } from 'react'
 import RouterCard from '../components/RouterCard'
 import { useAuthGuard } from '../hooks/useAuthGuard'
 import FilterResultsSeaching from '../components/FilterResultsSeaching'
-import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import PaginationControls from '../components/PaginationControls'
-import axios from 'axios'
+import { secureFetch } from '../utils/secureFetch'
+import toast from 'react-hot-toast'
 
 export default function Routers() {
   const { user, loadingUser } = useAuthGuard()
+  const router = useRouter()
+
   const [routers, setRouters] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
-  const [totalCount, setTotalCount] = useState(0) // total number of routers from backend
+  const [totalCount, setTotalCount] = useState(0)
 
-  const router = useRouter()
   const API_URL = process.env.NEXT_PUBLIC_API_URL
 
   const fetchRouters = async (searchTerm = '', page = 1, pageSize = 12) => {
     try {
       setLoading(true)
-      const token = localStorage.getItem('accessToken')
-      const response = await axios.get(`${API_URL}/routers/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const res = await secureFetch({
+        url: `${API_URL}/routers/`,
         params: {
           search: searchTerm,
           page,
           page_size: pageSize,
         },
       })
-      setRouters(response.data.results)
-      setTotalCount(response.data.count)
+      setRouters(res.results || res)
+      setTotalCount(res.count || 0)
     } catch (error) {
-      setError(error.response?.data?.message || 'An error occurred')
+      console.error('Failed to fetch routers:', error)
+      setError(error?.message || 'An error occurred')
       toast.error('Failed to fetch routers.')
     } finally {
       setLoading(false)
@@ -46,14 +46,13 @@ export default function Routers() {
   }
 
   useEffect(() => {
-    if (!loadingUser && !user) {
+    if (loadingUser) return
+    if (!user) {
       router.replace('/login')
       return
     }
 
-    if (user) {
-      fetchRouters(search, currentPage, pageSize)
-    }
+    fetchRouters(search, currentPage, pageSize)
   }, [user, loadingUser, search, currentPage, pageSize])
 
   if (loadingUser) return null

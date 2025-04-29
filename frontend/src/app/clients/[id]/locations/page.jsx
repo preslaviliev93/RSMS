@@ -8,6 +8,7 @@ import { toast } from 'react-hot-toast'
 import { useAuthGuard } from '@/app/hooks/useAuthGuard'
 import FilterResultsSeaching from '@/app/components/FilterResultsSeaching'
 import PaginationControls from '@/app/components/PaginationControls'
+import { secureFetch } from '@/app/utils/secureFetch'
 
 export default function ClientLocationsPage() {
   const { id } = useParams()
@@ -23,14 +24,14 @@ export default function ClientLocationsPage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL
 
   const fetchLocations = async () => {
+    setLoading(true)
     try {
-      const token = localStorage.getItem('accessToken')
-      const res = await axios.get(`${API_URL}/clients/all-clients/${id}/locations/`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await secureFetch({
+        url: `${API_URL}/clients/all-clients/${id}/locations/`,
       })
-      setLocations(res.data)
+      setLocations(res)
     } catch (err) {
-      toast.error('Failed to fetch locations')
+      toast.error('Failed to fetch locations.')
     } finally {
       setLoading(false)
     }

@@ -29,13 +29,9 @@ export default function EditClientPage() {
 
     const fetchClient = async () => {
       try {
-        user
-        const token = localStorage.getItem('accessToken')
-        const response = await axios.get(`${API_URL}/clients/all-clients/${id}/`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          })
+        const response = await secureFetch({
+          url: `${API_URL}/clients/all-clients/${id}/`
+        })
         setFormData(response.data)
       } catch (err) {
         setError('Failed to load client.')
