@@ -129,13 +129,13 @@ export default function LocationsPage() {
                 <div className="flex gap-2 justify-end">
                   <button
                     onClick={() => { setEditingLocation(location); setIsModalOpen(true) }}
-                    className="p-2 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 transition"
+                    className="cursor-pointer p-2 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 transition"
                   >
                     <Edit className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(location.id, location.location_name)}
-                    className="p-2 rounded-full bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800 transition"
+                    className="cursor-pointer p-2 rounded-full bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800 transition"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -143,7 +143,7 @@ export default function LocationsPage() {
               )}
               <button
                 onClick={() => router.push(`/locations/${location.id}`)}
-                className="w-full mt-4 py-2 text-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 font-semibold transition"
+                className="cursor-pointer w-full mt-4 py-2 text-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 font-semibold transition"
               >
                 View DHCP Leases →
               </button>
@@ -181,13 +181,13 @@ export default function LocationsPage() {
             <div className="flex justify-end gap-2 pt-4">
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 text-sm rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+                className="cursor-pointer px-4 py-2 text-sm rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
               >
                 Cancel
               </button>
               <button
                 onClick={handleEditSave}
-                className="px-4 py-2 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+                className="cursor-pointer px-4 py-2 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 transition"
               >
                 Save Changes
               </button>

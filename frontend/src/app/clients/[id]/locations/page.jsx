@@ -44,7 +44,6 @@ export default function ClientLocationsPage() {
   if (loadingUser || !user) return null
   if (loading) return <p className="text-center text-gray-500 dark:text-gray-400">Loading locations...</p>
 
-  // ✅ Local search filtering
   const filteredLocations = locations.filter(location =>
     Object.values(location)
       .filter(value => typeof value === 'string')

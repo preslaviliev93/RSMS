@@ -10,7 +10,7 @@ export default function Modal({ isOpen, onClose, children }) {
       <div className="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-lg p-6 w-full max-w-md relative">
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          className="cursor-pointer absolute top-3 right-3 text-red-500 hover:text-red-600 dark:hover:text-red-300"
         >
           ✕
         </button>
