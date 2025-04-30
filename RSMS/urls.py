@@ -10,4 +10,5 @@ urlpatterns = [
     path('routers/', include('routers.urls')),
     path('logs/', include('logging_services.urls')),
     path('locations/', include('locations_manager.urls')),
+    path('movements/', include('movements_detector.urls'))
 ]
