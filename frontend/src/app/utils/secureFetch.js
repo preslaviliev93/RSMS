@@ -3,12 +3,13 @@
 import axios from "axios"
 import toast from "react-hot-toast"
 import { redirect } from 'next/navigation'
+import {useRouter} from 'next/navigation'
 
 export const secureFetch = async ({ url, method = 'GET', params = {}, data = {} }) => {
   const token = localStorage.getItem('accessToken')
   if (!token) {
     toast.error('Session expired. Please log in again.')
-    redirect('/login')
+    router.push('/login')
     return
   }
 

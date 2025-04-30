@@ -6,6 +6,7 @@ import { saveTokens } from '../utils/auth';
 import { validateLoginFormUserInputData } from '../utils/validations';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
