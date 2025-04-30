@@ -184,7 +184,8 @@ class AllMachinesView(APIView):
                 Q(mac_address__icontains=search) |
                 Q(dhcp_lease_ip_address__icontains=search) |
                 Q(client_id__client_name__icontains=search) |
-                Q(router_id__router_serial__icontains=search)
+                Q(router_id__router_serial__icontains=search) |
+                Q(router_id__location__name__icontains=search)
             )
         paginator = DHCPLeasesPagination()
         result_page = paginator.paginate_queryset(leases, request)

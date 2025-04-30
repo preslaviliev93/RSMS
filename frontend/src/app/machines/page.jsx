@@ -11,19 +11,20 @@ import { Clipboard } from 'lucide-react'
 import Tooltip from '../components/Tooltip'
 import Link from 'next/link'
 import { secureFetch } from '../utils/secureFetch'
+import ExportCSVButton from '../components/ExportCSVButton'
 
 
 export default function AllMachinesPage() {
   const router = useRouter()
   const API_URL = process.env.NEXT_PUBLIC_API_URL
   const { user, loadingUser } = useAuthGuard()
-
   const [leases, setLeases] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
   const [totalCount, setTotalCount] = useState(0)
+  const [exporting, setExporting] = useState(false)
 
   const fetchLeases = async (searchTerm = '', page = 1, pageSize = 12) => {
     if (loadingUser) return
@@ -82,10 +83,58 @@ export default function AllMachinesPage() {
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
 
+  
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">All Machines</h1>
+      <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                All Machines:
+              </h1>
+              <ExportCSVButton
+                fetchData={async () => {
+                  try {
+                    const res = await secureFetch({
+                      url: `${API_URL}/routers/all-leases/`,
+                      params: {
+                        page_size: 10000, 
+                      },
+                    });
+                
+                    const allLeases = res.results || res; 
+                
+                    return allLeases.map((lease) => ({
+                      ID: lease.id,
+                      Hostname: lease.hostname,
+                      MAC_Address: lease.mac_address,
+                      IP_Address: lease.dhcp_lease_ip_address,
+                      Client_Name: lease.client_name || 'N/A',
+                      Router_Serial: lease.router_serial || 'N/A',
+                      Location: lease.location_name || "N/A",
+                      Added_At: new Date(lease.added_at).toLocaleString(),
+                    }));
+                  } catch (error) {
+                    toast.error("Failed to fetch all machines for export.");
+                    return [];
+                  }
+                }}
+                
+                headers={[
+                  'ID',
+                  'Hostname',
+                  'MAC_Address',
+                  'IP_Address',
+                  'Client_Name',
+                  'Router_Serial',
+                  'Location',
+                  'Added_At'
+                ]}
+                fileName={`all-machines-export-${new Date().toISOString().split('T')[0]}.csv`}
+                buttonText="Export Machines to CSV"
+                className="cursor-pointer hover:bg-blue-700"
+              />
 
+            </div>
       <FilterResultsSeaching
         type="text"
         placeholder="Search by hostname, MAC, IP or client..."
@@ -112,6 +161,7 @@ export default function AllMachinesPage() {
                 <th className="px-4 py-2 text-left">IP Address</th>
                 <th className="px-4 py-2 text-left">Client</th>
                 <th className="px-4 py-2 text-left">Router S/N</th>
+                <th className="px-4 py-2 text-left">Location</th>
                 <th className="px-4 py-2 text-left">Added At</th>
               </tr>
             </thead>
@@ -138,7 +188,13 @@ export default function AllMachinesPage() {
                         {lease.router_serial ?? 'Unknown'}
                       </Link>
                     </td>
-                    <td className="px-4 py-2 text-xs text-gray-500">{new Date(lease.added_at).toLocaleString()}</td>
+                    <td className="px-4 py-2">
+                      <Link href={`/locations/${lease.location_id}`} className="text-blue-500 hover:underline">
+                        {lease.location_name}
+                      </Link>
+                    </td>
+                    {/* <td className="px-4 py-2 text-xs text-gray-500 dark:text-gray-50">{lease.location_name || "Unknown Location"}</td> */}
+                    <td className="px-4 py-2 text-xs text-gray-500 dark:text-gray-200">{new Date(lease.added_at).toLocaleString()}</td>
                   </tr>
                 ))
               ) : (
