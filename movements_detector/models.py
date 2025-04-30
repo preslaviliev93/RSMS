@@ -27,5 +27,6 @@ class MacMovementHistory(models.Model):
 
     from_location = models.CharField(max_length=250, null=True, blank=True)
     to_location = models.CharField(max_length=250, null=True, blank=True)
+    movement_type = models.CharField(max_length=200, null=True, blank=True)
 
     moved_at = models.DateTimeField(auto_now_add=True)
