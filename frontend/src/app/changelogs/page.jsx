@@ -23,6 +23,8 @@ export default function Changelogs() {
                 <li className="list-decimal">Fixed issues with stale/duplicating DHCP leases sent from the routers.</li>
                 <li className="list-decimal">Added "Changelogs" section to the SideBar component.</li>
                 <li className="list-decimal">Added "Copy to clipboard"  button near the 'client hostname' section to the ClientCard component.</li>
+                <li className="list-decimal">Modified the "Export To CSV Button to get current selection or all results</li>
+                <li className="list-decimal">Added search controls (Exact match / Exclude match) under the search bar.</li>
             </ol>
         </div>
 

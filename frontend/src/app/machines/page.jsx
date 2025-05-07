@@ -25,6 +25,9 @@ export default function AllMachinesPage() {
   const [pageSize, setPageSize] = useState(12)
   const [totalCount, setTotalCount] = useState(0)
   const [exporting, setExporting] = useState(false)
+  const [exactMatch, setExactMatch] = useState(false)
+  const [excludeMatch, setExcludeMatch] = useState(false)
+
 
   const fetchLeases = async (searchTerm = '', page = 1, pageSize = 12) => {
     if (loadingUser) return
@@ -39,6 +42,8 @@ export default function AllMachinesPage() {
         url: `${API_URL}/routers/all-leases/`,
         params: {
           search: searchTerm,
+          exact: exactMatch,
+          exclude: excludeMatch,
           page,
           page_size: pageSize,
         },
@@ -99,6 +104,8 @@ export default function AllMachinesPage() {
                     url: `${API_URL}/routers/all-leases/`,
                     params: {
                       search,
+                      exact: exactMatch,
+                      exclude: excludeMatch,
                       page_size: 10000,  // big number to get all filtered results
                     },
                   })
@@ -137,15 +144,20 @@ export default function AllMachinesPage() {
 
 
             </div>
-      <FilterResultsSeaching
-        type="text"
-        placeholder="Search by hostname, MAC, IP or client..."
-        value={search}
-        onChange={(e) => {
-          setSearch(e.target.value)
-          setCurrentPage(1) // Reset page to 1 when searching
-        }}
-      />
+            <FilterResultsSeaching
+              type="text"
+              placeholder="Search by hostname, MAC, IP or client..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value)
+                setCurrentPage(1)
+              }}
+              exactMatch={exactMatch}
+              setExactMatch={setExactMatch}
+              excludeMatch={excludeMatch}
+              setExcludeMatch={setExcludeMatch}
+            />
+
 
       <p className="text-sm text-gray-600 dark:text-gray-400">
         Showing {leases.length} of {totalCount} machines (Page {currentPage} of {totalPages})

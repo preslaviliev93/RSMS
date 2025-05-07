@@ -121,14 +121,34 @@ class LocationsView(ListAPIView):
     pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
-        search = self.request.query_params.get('search', None)
+        search = self.request.query_params.get('search')
+        exact = self.request.query_params.get('exact') == 'true'
+        exclude = self.request.query_params.get('exclude') == 'true'
+
         qs = self.queryset
+
         if search:
-            qs = qs.filter(
-                Q(name__icontains=search) |
-                Q(client__client_name__icontains=search) |
-                Q(router_vpn_ip__router_serial__icontains=search)
-            )
+            if exact:
+                query = (
+                        Q(name__iexact=search) |
+                        Q(client__client_name__iexact=search) |
+                        Q(router_vpn_ip__router_serial__iexact=search)
+                )
+            elif exclude:
+                query = ~(
+                        Q(name__icontains=search) |
+                        Q(client__client_name__icontains=search) |
+                        Q(router_vpn_ip__router_serial__icontains=search)
+                )
+            else:
+                query = (
+                        Q(name__icontains=search) |
+                        Q(client__client_name__icontains=search) |
+                        Q(router_vpn_ip__router_serial__icontains=search)
+                )
+
+            qs = qs.filter(query)
+
         return qs
 
 

@@ -19,17 +19,38 @@ class ClientCreateAPIView(APIView):
     def get(self, request):
         clients = Client.objects.all().order_by('-id')
         search = request.query_params.get('search')
+        exact = request.query_params.get('exact') == 'true'
+        exclude = request.query_params.get('exclude') == 'true'
+
         if search:
-            clients = clients.filter(
-                Q(client_name__icontains=search) |
-                Q(client_city__icontains=search) |
-                Q(client_country__icontains=search) |
-                Q(client_data_center__icontains=search) |
-                Q(client_hostname__icontains=search) |
-                Q(client_router_prefix__icontains=search) |
-                Q(client_address__icontains=search) |
-                Q(client_data_center__icontains=search)
-            )
+            search_q = Q(client_name__icontains=search) | Q(client_city__icontains=search) | Q(
+                client_country__icontains=search) | Q(client_data_center__icontains=search) | Q(
+                client_hostname__icontains=search) | Q(client_router_prefix__icontains=search) | Q(
+                client_address__icontains=search)
+
+            if exact:
+                search_q = (
+                        Q(client_name__iexact=search) |
+                        Q(client_city__iexact=search) |
+                        Q(client_country__iexact=search) |
+                        Q(client_data_center__iexact=search) |
+                        Q(client_hostname__iexact=search) |
+                        Q(client_router_prefix__iexact=search) |
+                        Q(client_address__iexact=search)
+                )
+            elif exclude:
+                search_q = ~(
+                        Q(client_name__icontains=search) |
+                        Q(client_city__icontains=search) |
+                        Q(client_country__icontains=search) |
+                        Q(client_data_center__icontains=search) |
+                        Q(client_hostname__icontains=search) |
+                        Q(client_router_prefix__icontains=search) |
+                        Q(client_address__icontains=search)
+                )
+
+            clients = clients.filter(search_q)
+
         paginator = ClientPagination()
         result_page = paginator.paginate_queryset(clients, request)
         serializer = ClientSerializer(result_page, many=True)

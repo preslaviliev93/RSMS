@@ -29,6 +29,10 @@ export default function ClientsPage() {
   const [editingClient, setEditingClient] = useState(null)
   const [editFormData, setEditFormData] = useState({})
 
+  const [exactMatch, setExactMatch] = useState(false)
+  const [excludeMatch, setExcludeMatch] = useState(false)
+
+
   const fetchClients = async () => {
     setLoading(true)
     try {
@@ -98,11 +102,20 @@ export default function ClientsPage() {
     }
   }
 
-  const filteredClients = clients.filter(client =>
-    Object.values(client)
-      .filter(value => typeof value === 'string')
-      .some(value => value.toLowerCase().includes(search.toLowerCase()))
-  )
+  const filteredClients = clients.filter(client => {
+    const fields = Object.values(client).filter(val => typeof val === 'string')
+    const normalizedSearch = search.toLowerCase()
+  
+    if (exactMatch) {
+      return fields.some(val => val.toLowerCase() === normalizedSearch)
+    } else if (excludeMatch) {
+      return !fields.some(val => val.toLowerCase().includes(normalizedSearch))
+    } else {
+      return fields.some(val => val.toLowerCase().includes(normalizedSearch))
+    }
+  })
+  
+  
 
   const totalPages = Math.max(1, Math.ceil(filteredClients.length / pageSize))
   const startIndex = (currentPage - 1) * pageSize
@@ -125,15 +138,20 @@ export default function ClientsPage() {
       {/* Search and Add Client button */}
       <div className="flex items-center justify-between gap-4 w-full">
   <div className="w-full">
-    <FilterResultsSeaching
-      type="text"
-      placeholder="Search clients..."
-      value={search}
-      onChange={(e) => {
-        setSearch(e.target.value)
-        setCurrentPage(1)
-      }}
-    />
+  <FilterResultsSeaching
+    type="text"
+    placeholder="Search clients..."
+    value={search}
+    onChange={(e) => {
+      setSearch(e.target.value)
+      setCurrentPage(1)
+    }}
+    exactMatch={exactMatch}
+    setExactMatch={setExactMatch}
+    excludeMatch={excludeMatch}
+    setExcludeMatch={setExcludeMatch}
+  />
+
   </div>
 
   <div className="flex items-center gap-2 shrink-0">
@@ -158,7 +176,11 @@ export default function ClientsPage() {
         try {
           const res = await secureFetch({
             url: `${API_URL}/clients/all-clients/`,
-            params: { page_size: 10000 },
+            params: { 
+              search,
+              exact: exactMatch,
+              exclude: exactMatch,
+              page_size: 10000 },
           })
           const allClients = res.results || res
           return allClients.map((client) => ({

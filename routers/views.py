@@ -20,26 +20,50 @@ class RouterView(APIView):
     def get(self, request):
         routers = Routers.objects.all().order_by('router_serial')
         search = request.query_params.get('search', None)
-        if search:
-            routers = routers.filter(
-                Q(router_serial__icontains=search) |
-                Q(router_model__icontains=search) |
-                Q(router_version__icontains=search) |
-                Q(router_hardware__icontains=search) |
-                Q(router_identity__icontains=search) |
-                Q(router_uplink_ip__icontains=search) |
-                Q(router_public_ip__icontains=search) |
-                Q(router_vpn_mgmt_ip__icontains=search) |
-                Q(router_hc_client__icontains=search) |
-                Q(router_hc_client__icontains=search) |
-                Q(router_comment__icontains=search) |
-                Q(router_uptime__icontains=search) |
-                Q(router_location_country__icontains=search) |
-                Q(router_last_seen__icontains=search) |
-                Q(router_added__icontains=search) |
-                Q(location__name__icontains=search)
-            )
+        exact = request.query_params.get('exact') == 'true'
+        exclude = request.query_params.get('exclude') == 'true'
         client_id = request.query_params.get('client_id')
+
+        if search:
+            if exact:
+                lookup = (
+                    Q(router_serial__iexact=search) |
+                    Q(router_model__iexact=search) |
+                    Q(router_version__iexact=search) |
+                    Q(router_hardware__iexact=search) |
+                    Q(router_identity__iexact=search) |
+                    Q(router_uplink_ip__iexact=search) |
+                    Q(router_public_ip__iexact=search) |
+                    Q(router_vpn_mgmt_ip__iexact=search) |
+                    Q(router_hc_client__iexact=search) |
+                    Q(router_comment__iexact=search) |
+                    Q(router_uptime__iexact=search) |
+                    Q(router_location_country__iexact=search) |
+                    Q(router_last_seen__iexact=search) |
+                    Q(router_added__iexact=search) |
+                    Q(location__name__iexact=search)
+                )
+            else:
+                lookup = (
+                    Q(router_serial__icontains=search) |
+                    Q(router_model__icontains=search) |
+                    Q(router_version__icontains=search) |
+                    Q(router_hardware__icontains=search) |
+                    Q(router_identity__icontains=search) |
+                    Q(router_uplink_ip__icontains=search) |
+                    Q(router_public_ip__icontains=search) |
+                    Q(router_vpn_mgmt_ip__icontains=search) |
+                    Q(router_hc_client__icontains=search) |
+                    Q(router_comment__icontains=search) |
+                    Q(router_uptime__icontains=search) |
+                    Q(router_location_country__icontains=search) |
+                    Q(router_last_seen__icontains=search) |
+                    Q(router_added__icontains=search) |
+                    Q(location__name__icontains=search)
+                )
+
+            routers = routers.exclude(lookup) if exclude else routers.filter(lookup)
+
         if client_id:
             routers = routers.filter(router_client_id=client_id)
 
@@ -47,7 +71,6 @@ class RouterView(APIView):
         result_page = paginator.paginate_queryset(routers, request)
         serializer = RoutersSerializer(result_page, many=True)
         return paginator.get_paginated_response(serializer.data)
-
 
 class RouterDetailView(RetrieveAPIView):
     queryset = Routers.objects.all()
@@ -184,16 +207,32 @@ class AllMachinesView(APIView):
 
     def get(self, request):
         search = request.query_params.get('search', None)
+        exact = request.query_params.get('exact') == 'true'
+        exclude = request.query_params.get('exclude') == 'true'
+
         leases = DHCPLeases.objects.select_related('client_id', 'router_id').order_by('-added_at')
+
         if search:
-            leases = leases.filter(
-                Q(hostname__icontains=search) |
-                Q(mac_address__icontains=search) |
-                Q(dhcp_lease_ip_address__icontains=search) |
-                Q(client_id__client_name__icontains=search) |
-                Q(router_id__router_serial__icontains=search) |
-                Q(router_id__location__name__icontains=search)
-            )
+            lookup = Q(hostname__icontains=search) | \
+                     Q(mac_address__icontains=search) | \
+                     Q(dhcp_lease_ip_address__icontains=search) | \
+                     Q(client_id__client_name__icontains=search) | \
+                     Q(router_id__router_serial__icontains=search) | \
+                     Q(router_id__location__name__icontains=search)
+
+            if exact:
+                lookup = Q(hostname__iexact=search) | \
+                         Q(mac_address__iexact=search) | \
+                         Q(dhcp_lease_ip_address__iexact=search) | \
+                         Q(client_id__client_name__iexact=search) | \
+                         Q(router_id__router_serial__iexact=search) | \
+                         Q(router_id__location__name__iexact=search)
+
+            if exclude:
+                leases = leases.exclude(lookup)
+            else:
+                leases = leases.filter(lookup)
+
         paginator = DHCPLeasesPagination()
         result_page = paginator.paginate_queryset(leases, request)
         serializer = DHCPLeasesSerializer(result_page, many=True)

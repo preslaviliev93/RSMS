@@ -24,6 +24,9 @@ export default function LocationsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { user, loadingUser } = useAuthGuard()
   const router = useRouter()
+  const [exactMatch, setExactMatch] = useState(false)
+  const [excludeMatch, setExcludeMatch] = useState(false)
+
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -34,6 +37,8 @@ export default function LocationsPage() {
         url: `${API_URL}/locations/`,
         params: {
           search,
+          exact: exactMatch,
+          exclude: excludeMatch,
           page: currentPage,
           page_size: pageSize,
         },
@@ -108,6 +113,8 @@ export default function LocationsPage() {
         url: `${API_URL}/locations/`,
         params: {
           search,
+          exact: exactMatch,
+          exclude: excludeMatch,
           page_size: 10000,
         },
       })
@@ -142,12 +149,17 @@ export default function LocationsPage() {
 </div>
 
 
-      <FilterResultsSeaching
-        type="text"
-        placeholder="Search locations, clients, routers..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+  <FilterResultsSeaching
+    type="text"
+    placeholder="Search locations, clients, routers..."
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    exactMatch={exactMatch}
+    setExactMatch={setExactMatch}
+    excludeMatch={excludeMatch}
+    setExcludeMatch={setExcludeMatch}
+  />
+
 
       <p className="text-sm text-gray-600 dark:text-gray-400">
         Showing {totalCount} results (Page {currentPage} of {totalPages})

@@ -21,17 +21,22 @@ export default function Routers() {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
   const [totalCount, setTotalCount] = useState(0)
+  const [exactMatch, setExactMatch] = useState(false)
+  const [excludeMatch, setExcludeMatch] = useState(false)
+
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-  const fetchRouters = async (searchTerm = '', page = 1, pageSize = 12) => {
+  const fetchRouters = async () => {
     try {
       setLoading(true)
       const res = await secureFetch({
         url: `${API_URL}/routers/`,
         params: {
-          search: searchTerm,
-          page,
+          search,
+          exact: exactMatch,
+          exclude: excludeMatch,
+          page: currentPage,
           page_size: pageSize,
         },
       })
@@ -45,6 +50,7 @@ export default function Routers() {
       setLoading(false)
     }
   }
+  
 
   useEffect(() => {
     if (loadingUser) return
@@ -54,7 +60,7 @@ export default function Routers() {
     }
 
     fetchRouters(search, currentPage, pageSize)
-  }, [user, loadingUser, search, currentPage, pageSize])
+  }, [user, loadingUser, search, currentPage, pageSize, exactMatch, excludeMatch])
 
   if (loadingUser) return null
   if (!user) return null
@@ -73,6 +79,8 @@ export default function Routers() {
               url: `${API_URL}/routers/`,
               params: {
                 search,
+                exact: exactMatch,
+                exclude: excludeMatch,
                 page_size: 10000,
               },
             })
@@ -118,7 +126,13 @@ export default function Routers() {
           setSearch(e.target.value)
           setCurrentPage(1)
         }}
+        exactMatch={exactMatch}
+        setExactMatch={setExactMatch}
+        excludeMatch={excludeMatch}
+        setExcludeMatch={setExcludeMatch}
       />
+
+
 
       {loading ? (
         <p className="text-center text-gray-500 dark:text-gray-400">Loading routers...</p>
