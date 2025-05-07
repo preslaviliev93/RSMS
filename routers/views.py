@@ -121,45 +121,46 @@ class RegisterDHCPLeases(APIView):
     def post(self, request):
         if request.method.upper() != 'POST':
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
         try:
+            # Parse data
             if isinstance(request.data, dict) and len(request.data) == 1:
                 raw_data = list(request.data.keys())[0]
                 data = json.loads(raw_data)
             else:
                 data = request.data
-            # print(f"DHCP INFO {data}")
+
             router_serial = data.get('router_serial')
-            router_id = get_router_id_by_router_serial(router_serial)
             leases = data.get('mac_leases')
+            router_id = get_router_id_by_router_serial(router_serial)
             client = get_router_client_by_serial(router_serial)
 
             macs_in_request = [lease['mac_address'] for lease in leases]
 
             with transaction.atomic():
-                # Remove old/stale dhcp leases
                 DHCPLeases.objects.filter(router_id=router_id).exclude(mac_address__in=macs_in_request).delete()
 
-            for lease in leases:
-                dhcp_lease, created = DHCPLeases.objects.update_or_create(
-                    router_id=router_id,
-                    mac_address=lease['mac_address'],
-                    defaults={
-                        "mac_address": lease['mac_address'],
-                        "client_id": client,
-                        "dhcp_lease_ip_address": lease['internal_ip'],
-                        "hostname": lease['hostname'],
-                        "added_at": timezone.now()
-                    }
-                )
+                for lease in leases:
+                    DHCPLeases.objects.update_or_create(
+                        router_id=router_id,
+                        mac_address=lease['mac_address'],
+                        defaults={
+                            "mac_address": lease['mac_address'],
+                            "client_id": client,
+                            "dhcp_lease_ip_address": lease['internal_ip'],
+                            "hostname": lease['hostname'],
+                            "added_at": timezone.now()
+                        }
+                    )
 
             return Response({"message": "Router data received and saved."}, status=status.HTTP_201_CREATED)
 
         except json.JSONDecodeError:
             return Response({"error": "Invalid JSON format"}, status=status.HTTP_400_BAD_REQUEST)
-
         except Exception as e:
             print(f"Error: {str(e)}")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 class ClientDHCPLeasesView(APIView):
