@@ -12,7 +12,7 @@ from django.db.models import Q
 from routers.utils import (match_client_by_router_identity, update_heartbeat, sync_interfaces,
                            get_router_id_by_router_serial, get_router_client_by_serial)
 from locations_manager.models import Location
-
+from django.db import transaction
 
 class RouterView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -132,6 +132,12 @@ class RegisterDHCPLeases(APIView):
             router_id = get_router_id_by_router_serial(router_serial)
             leases = data.get('mac_leases')
             client = get_router_client_by_serial(router_serial)
+
+            macs_in_request = [lease['mac_address'] for lease in leases]
+
+            with transaction.atomic():
+                # Remove old/stale dhcp leases
+                DHCPLeases.objects.filter(router_id=router_id).exclude(mac_address__in=macs_in_request).delete()
 
             for lease in leases:
                 dhcp_lease, created = DHCPLeases.objects.update_or_create(
