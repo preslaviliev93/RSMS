@@ -1,11 +1,19 @@
 'use client'
 
 import React from 'react'
-import { MapPin, Building2, MapPinCheck, ArrowRight, Globe, Pencil, Trash, Monitor, Router } from 'lucide-react'
+import { MapPin, Building2, MapPinCheck, ArrowRight, Globe, Pencil, Trash, Monitor, Router, Clipboard } from 'lucide-react'
 import Link from 'next/link'
 import Tooltip from '../components/Tooltip'
+import toast from 'react-hot-toast'
 
 export default function ClientCard({ client, isAdmin = false, onDelete, onEdit }) {
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text)
+    toast.success("Coppied to clipboard!")
+  }
+
+
   return (
     <div className="bg-white dark:bg-[#1c1c1c] rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 p-6 flex flex-col gap-4 transition hover:shadow-lg">
       <div className="flex justify-between items-center">
@@ -49,6 +57,14 @@ export default function ClientCard({ client, isAdmin = false, onDelete, onEdit }
         <p className="flex items-center gap-2">
           <Globe className="w-4 h-4" />
           {client.client_hostname}
+          <Tooltip text="Copy to clipboard" position="top">
+            <button
+              onClick={() => copyToClipboard(client.client_hostname)}
+              className="ml-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                <Clipboard className="w-4 h-4 cursor-pointer" />
+            </button>
+          </Tooltip>
         </p>
         <p className="flex items-center gap-2">
           <MapPin className="w-4 h-4" />

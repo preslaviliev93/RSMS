@@ -12,7 +12,7 @@ import CollapseToggleButton from '../components/CollapseToggleButton';
 import {
   Home, Server, Router, FileText,
   CircleUserRound, UserPen, KeyRound,
-  LogOut, Monitor, MapPinCheck, Navigation2
+  LogOut, Monitor, MapPinCheck, Navigation2, NotepadText,
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -68,6 +68,7 @@ export default function Sidebar() {
         {user && (
           <>
             <CustomIconLink href="/home" icon={<Home />} text="Home" collapsed={collapsed} />
+            <CustomIconLink href="/changelogs" icon={<NotepadText />} text="Change Logs" collapsed={collapsed} />
             <CustomIconLink href="/profile" icon={<UserPen />} text="My Profile" collapsed={collapsed} />
           </>
         )}
