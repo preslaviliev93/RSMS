@@ -92,47 +92,49 @@ export default function AllMachinesPage() {
                 All Machines:
               </h1>
               <ExportCSVButton
-                fetchData={async () => {
-                  try {
-                    const res = await secureFetch({
-                      url: `${API_URL}/routers/all-leases/`,
-                      params: {
-                        page_size: 10000, 
-                      },
-                    });
-                
-                    const allLeases = res.results || res; 
-                
-                    return allLeases.map((lease) => ({
-                      ID: lease.id,
-                      Hostname: lease.hostname,
-                      MAC_Address: lease.mac_address,
-                      IP_Address: lease.dhcp_lease_ip_address,
-                      Client_Name: lease.client_name || 'N/A',
-                      Router_Serial: lease.router_serial || 'N/A',
-                      Location: lease.location_name || "N/A",
-                      Added_At: new Date(lease.added_at).toLocaleString(),
-                    }));
-                  } catch (error) {
-                    toast.error("Failed to fetch all machines for export.");
-                    return [];
-                  }
+                fileNamePrefix="all-machines-export"
+                className="cursor-pointer"
+                fetchFilteredData={async () => {
+                  const res = await secureFetch({
+                    url: `${API_URL}/routers/all-leases/`,
+                    params: {
+                      search,
+                      page_size: 10000,  // big number to get all filtered results
+                    },
+                  })
+
+                  const leases = res.results || res
+                  return leases.map(lease => ({
+                    Hostname: lease.hostname,
+                    MAC_Address: lease.mac_address,
+                    IP_Address: lease.dhcp_lease_ip_address,
+                    Client_Name: lease.client_name || 'N/A',
+                    Router_Serial: lease.router_serial || 'N/A',
+                    Location: lease.location_name || 'N/A',
+                    Added_At: new Date(lease.added_at).toLocaleString(),
+                  }))
                 }}
-                
-                headers={[
-                  'ID',
-                  'Hostname',
-                  'MAC_Address',
-                  'IP_Address',
-                  'Client_Name',
-                  'Router_Serial',
-                  'Location',
-                  'Added_At'
-                ]}
-                fileName={`all-machines-export-${new Date().toISOString().split('T')[0]}.csv`}
-                buttonText="Export Machines to CSV"
-                className="cursor-pointer hover:bg-blue-700"
-              />
+                fetchAllData={async () => {
+                  const res = await secureFetch({
+                    url: `${API_URL}/routers/all-leases/`,
+                    params: {
+                      page_size: 10000,
+                    },
+                  })
+
+    const leases = res.results || res
+    return leases.map(lease => ({
+      Hostname: lease.hostname,
+      MAC_Address: lease.mac_address,
+      IP_Address: lease.dhcp_lease_ip_address,
+      Client_Name: lease.client_name || 'N/A',
+      Router_Serial: lease.router_serial || 'N/A',
+      Location: lease.location_name || 'N/A',
+      Added_At: new Date(lease.added_at).toLocaleString(),
+    }))
+  }}
+/>
+
 
             </div>
       <FilterResultsSeaching

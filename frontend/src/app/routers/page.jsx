@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import PaginationControls from '../components/PaginationControls'
 import { secureFetch } from '../utils/secureFetch'
 import toast from 'react-hot-toast'
+import ExportCSVButton from '../components/ExportCSVButton'
 
 export default function Routers() {
   const { user, loadingUser } = useAuthGuard()
@@ -64,6 +65,49 @@ export default function Routers() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Routers</h1>
+        <ExportCSVButton
+          fileNamePrefix="routers"
+          className="cursor-pointer"
+          fetchFilteredData={async () => {
+            const res = await secureFetch({
+              url: `${API_URL}/routers/`,
+              params: {
+                search,
+                page_size: 10000,
+              },
+            })
+
+            const routersList = res.results || res
+
+            return routersList.map(router => ({
+              ID: router.id,
+              Serial: router.router_serial || 'N/A',
+              Model: router.model || 'N/A',
+              Client: router.client_name || 'N/A',
+              Status: router.status || 'Unknown',
+              Location: router.location_name || 'Unknown Location',
+              Last_Seen: router.last_seen ? new Date(router.last_seen).toLocaleString() : 'Never',
+            }))
+          }}
+          fetchAllData={async () => {
+            const res = await secureFetch({
+              url: `${API_URL}/routers/`,
+              params: { page_size: 10000 },
+            })
+
+            const routersList = res.results || res
+
+            return routersList.map(router => ({
+              ID: router.id,
+              Serial: router.router_serial || 'N/A',
+              Model: router.model || 'N/A',
+              Client: router.client_name || 'N/A',
+              Status: router.status || 'Unknown',
+              Location: router.location_name || 'Unknown Location',
+              Last_Seen: router.last_seen ? new Date(router.last_seen).toLocaleString() : 'Never',
+            }))
+          }}
+        />
       </div>
 
       <FilterResultsSeaching

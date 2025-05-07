@@ -127,11 +127,9 @@ class LocationsView(ListAPIView):
             qs = qs.filter(
                 Q(name__icontains=search) |
                 Q(client__client_name__icontains=search) |
-                Q(router_vpn_ip__router_serial__icontains=search) |
-                Q(router_id__location__name__icontains=search)
+                Q(router_vpn_ip__router_serial__icontains=search)
             )
         return qs
-
 
 
 class LocationDetailView(APIView):

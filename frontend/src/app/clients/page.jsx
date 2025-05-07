@@ -11,6 +11,7 @@ import Modal from '../components/Modal'
 import { useRouter } from 'next/navigation'
 import { secureFetch } from '../utils/secureFetch'
 import toast from 'react-hot-toast'
+import ExportCSVButton from '../components/ExportCSVButton'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -123,22 +124,65 @@ export default function ClientsPage() {
     <div className="flex flex-col min-h-full gap-4 p-6">
       {/* Search and Add Client button */}
       <div className="flex items-center justify-between gap-4 w-full">
-        <div className="w-full">
-          <FilterResultsSeaching
-            type="text"
-            placeholder="Search clients..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value)
-              setCurrentPage(1)
-            }}
-          />
-        </div>
+  <div className="w-full">
+    <FilterResultsSeaching
+      type="text"
+      placeholder="Search clients..."
+      value={search}
+      onChange={(e) => {
+        setSearch(e.target.value)
+        setCurrentPage(1)
+      }}
+    />
+  </div>
 
-        <div className="shrink-0">
-          <AddClientModal onSuccess={fetchClients} />
-        </div>
-      </div>
+  <div className="flex items-center gap-2 shrink-0">
+    <ExportCSVButton
+      fileNamePrefix="clients"
+      className="cursor-pointer"
+      fetchFilteredData={async () => {
+        // export the filtered in-memory array
+        return filteredClients.map((client) => ({
+          ID: client.id,
+          Name: client.client_name || '',
+          Description: client.client_description || '',
+          Country: client.client_country || '',
+          City: client.client_city || '',
+          Hostname: client.client_hostname || '',
+          Prefix: client.client_router_prefix || '',
+          Address: client.client_address || '',
+          Data_Center: client.client_data_center || '',
+        }))
+      }}
+      fetchAllData={async () => {
+        try {
+          const res = await secureFetch({
+            url: `${API_URL}/clients/all-clients/`,
+            params: { page_size: 10000 },
+          })
+          const allClients = res.results || res
+          return allClients.map((client) => ({
+            ID: client.id,
+            Name: client.client_name || '',
+            Description: client.client_description || '',
+            Country: client.client_country || '',
+            City: client.client_city || '',
+            Hostname: client.client_hostname || '',
+            Prefix: client.client_router_prefix || '',
+            Address: client.client_address || '',
+            Data_Center: client.client_data_center || '',
+          }))
+        } catch (err) {
+          toast.error('Failed to fetch all clients for export.')
+          return []
+        }
+      }}
+    />
+    <AddClientModal onSuccess={fetchClients} />
+  </div>
+</div>
+
+
 
       {/* Clients Count */}
       <p className="text-sm text-gray-600 dark:text-gray-300">

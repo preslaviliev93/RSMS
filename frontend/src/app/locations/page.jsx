@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation'
 import Modal from '@/app/components/Modal'
 import FilterResultsSeaching from '../components/FilterResultsSeaching'
 import { secureFetch } from '../utils/secureFetch'
+import ExportCSVButton from '../components/ExportCSVButton'
 
 export default function LocationsPage() {
   const [locations, setLocations] = useState([])
@@ -93,9 +94,53 @@ export default function LocationsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <h1 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-        <MapPin className="w-6 h-6" /> Locations
-      </h1>
+      <div className="flex justify-between items-center">
+  <h1 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+    <MapPin className="w-6 h-6" /> Locations
+  </h1>
+
+  <ExportCSVButton
+    fileNamePrefix="locations"
+    className="cursor-pointer"
+    fetchFilteredData={async () => {
+      // Send current search query
+      const res = await secureFetch({
+        url: `${API_URL}/locations/`,
+        params: {
+          search,
+          page_size: 10000,
+        },
+      })
+
+      const data = res.results || res
+      return data.map((location) => ({
+        ID: location.id,
+        Name: location.name || 'N/A',
+        Client: location.client_name || 'N/A',
+        Router: location.router_serial || 'N/A',
+        Leases: location.leases_count || 0,
+      }))
+    }}
+    fetchAllData={async () => {
+      const res = await secureFetch({
+        url: `${API_URL}/locations/`,
+        params: {
+          page_size: 10000,
+        },
+      })
+
+      const data = res.results || res
+      return data.map((location) => ({
+        ID: location.id,
+        Name: location.name || 'N/A',
+        Client: location.client_name || 'N/A',
+        Router: location.router_serial || 'N/A',
+        Leases: location.leases_count || 0,
+      }))
+    }}
+  />
+</div>
+
 
       <FilterResultsSeaching
         type="text"
