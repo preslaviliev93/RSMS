@@ -6,8 +6,13 @@ from locations_manager.models import Location
 
 INCLUDED_HOSTNAME_KEYWORDS = ["search", "for", "specific", 'hostnames', 'to include']
 
+
 class Command(BaseCommand):
     help = "Detect MAC address movements and log them into history"
+
+    def log(self, message):
+        timestamp = now().strftime("%Y-%m-%d %H:%M:%S")
+        self.stdout.write(f"[{timestamp}] {message}")
 
     def handle(self, *args, **options):
         leases = DHCPLeases.objects.select_related('router_id', 'client_id')
@@ -15,41 +20,39 @@ class Command(BaseCommand):
         for lease in leases:
             mac = lease.mac_address
             if not mac:
-                self.stdout.write("[SKIP] Empty MAC address, skipping...")
+                self.log("[SKIP] Empty MAC address, skipping...")
                 continue
 
             hostname = lease.hostname or "unknown"
             if not any(keyword in hostname.lower() for keyword in INCLUDED_HOSTNAME_KEYWORDS):
-                self.stdout.write(f"[SKIP] Hostname '{hostname}' does not match included keywords for MAC {mac}")
+                self.log(f"[SKIP] Hostname '{hostname}' does not match included keywords for MAC {mac}")
                 continue
 
             router = lease.router_id
             client = lease.client_id
 
             if not router or not client:
-                self.stdout.write(f"[SKIP] Incomplete lease (router/client missing) for MAC {mac}, skipping...")
+                self.log(f"[SKIP] Incomplete lease (router/client missing) for MAC {mac}, skipping...")
                 continue
 
-            # Resolve location name from Location model
-            location_obj = Location.objects.filter(router_vpn_ip=router).first()
+            location_obj = Location.objects.filter(router_vpn_ip=router.router_vpn_mgmt_ip).first()
             location_name = location_obj.name if location_obj else None
 
             try:
                 snapshot = MacMovementSnapshot.objects.get(mac_address=mac)
             except MacMovementSnapshot.DoesNotExist:
-                snapshot = MacMovementSnapshot.objects.create(
+                MacMovementSnapshot.objects.create(
                     mac_address=mac,
                     hostname=hostname,
                     router=router,
                     client=client,
                     location_name=location_name
                 )
-                self.stdout.write(f"[INIT] Created snapshot for {mac}")
-                continue  # Don't treat this as movement
+                self.log(f"[INIT] Created snapshot for {mac}")
+                continue  # No movement to compare
 
-            # Check for movement only if snapshot has full data
             if not snapshot.router or not snapshot.client:
-                self.stdout.write(f"[SKIP] Snapshot for {mac} missing router/client, skipping movement check")
+                self.log(f"[SKIP] Snapshot for {mac} missing router/client, skipping movement check")
                 continue
 
             moved = False
@@ -83,6 +86,4 @@ class Command(BaseCommand):
                 snapshot.hostname = hostname
                 snapshot.save()
 
-                self.stdout.write(f"[MOVE] {mac} moved ({','.join(movement_type)})")
-            else:
-                self.stdout.write(f"[OK] No movement for {mac}")
+                self.log(f"[MOVE] {mac} moved ({','.join(movement_type)})")
