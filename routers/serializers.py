@@ -47,10 +47,19 @@ class RoutersSerializer(serializers.ModelSerializer):
     dhcp_leases = DHCPLeasesSerializer(many=True, read_only=True)
     router_client = ClientMiniSerializer(read_only=True)
     location_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Routers
-        fields = '__all__'
-        extra_fields = ['location_name']
+        fields = [
+            'id', 'router_serial',
+            'router_model', 'router_version', 'router_hardware',
+            'router_identity', 'router_uplink_ip', 'router_public_ip',
+            'router_vpn_mgmt_ip', 'router_client', 'router_hc_client',
+            'router_comment', 'router_uptime', 'router_location_country',
+            'router_last_seen', 'router_added', 'interfaces', 'dhcp_leases',
+            'location_name'
+        ]
+
     def validate_router_serial(self, value):
         if 0 <= len(value) >= 50:
             raise serializers.ValidationError('Router Serial Number must be between 1-50 characters long')

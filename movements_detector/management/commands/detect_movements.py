@@ -35,7 +35,7 @@ class Command(BaseCommand):
                 self.log(f"[SKIP] Incomplete lease (router/client missing) for MAC {mac}, skipping...")
                 continue
 
-            location_obj = Location.objects.filter(router_vpn_ip=router.router_vpn_mgmt_ip).first()
+            location_obj = Location.objects.filter(router_vpn_ip=router).first()
             location_name = location_obj.name if location_obj else None
 
             try:
