@@ -58,7 +58,10 @@ class RegisterLocationView(APIView):
                     break
 
             if not matching_interface:
-                skipped_entries.append({'entry': entry, 'reason': f"No matching router for IP '{tunnel_ip}' and Client '{client_name}'."})
+                skipped_entries.append({
+                    'entry': entry,
+                    'reason': f"No registered router with interface IP '{tunnel_ip}' for client '{client_name}'. Possibly the router is not registered or missing the update script."
+                })
                 continue
 
             router = matching_interface.router_id
